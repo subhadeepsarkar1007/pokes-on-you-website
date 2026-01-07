@@ -1,18 +1,5 @@
 <template>
-  <v-container fluid class="home-bg fill-height d-flex align-center justify-center">
-    <v-row core="12" class="text-center">
-      <v-col>
-        <div class="glass-card pa-6">
-          <h1 class="text-h4 font-weight-bold mb-4">Welcome</h1>
-          <p class="text-subtitle-1 mb-6">Premium Body Piercings</p>
-
-          <v-btn color="primary" block size="large" to="/schedule" class="mb-4">
-            Book Appointment
-          </v-btn>
-        </div>
-      </v-col>
-    </v-row>
-  </v-container>
+  <v-container fluid class="home-bg fill-height d-flex align-center justify-center" />
 </template>
 
 <style scoped>

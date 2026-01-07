@@ -12,10 +12,13 @@
 
     <v-navigation-drawer v-model="drawer" temporary location="top" class="custom-drawer" elevation="0">
       <v-list nav class="drawer-list">
-        <v-list-item to="/" @click="drawer = false" title="Home" class="menu-item" />
-        <v-list-item to="/schedule" @click="drawer = false" title="Schedule" class="menu-item" />
-        <v-list-item to="/gallery" @click="drawer = false" title="Gallery" class="menu-item" />
-        <v-list-item to="/aftercare" @click="drawer = false" title="Aftercare" class="menu-item" />
+        <v-list-item to="/" @click="drawer = false" title="Home" class="menu-item" active-class="active-item" />
+        <v-list-item to="/schedule" @click="drawer = false" title="Schedule Appointment" class="menu-item"
+          active-class="active-item" />
+        <v-list-item to="/gallery" @click="drawer = false" title="Jewellery Designs" class="menu-item"
+          active-class="active-item" />
+        <v-list-item to="/aftercare" @click="drawer = false" title="Aftercare Tips" class="menu-item"
+          active-class="active-item" />
       </v-list>
     </v-navigation-drawer>
 
@@ -27,7 +30,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-// Updated to match your new filename
 import bg from '@/assets/home-background.jpg'
 
 const drawer = ref(false)
@@ -44,46 +46,57 @@ const appStyle = {
 <style scoped>
 /* 1. Centered Floating Menu Styling */
 .custom-drawer {
-  /* Pushes the drawer down towards the center so the 'X' button is clear */
   top: 8% !important;
   margin: 0 20px !important;
   width: calc(100% - 40px) !important;
-
-  /* Glassmorphism & Shape */
   background: rgba(255, 255, 255, 0.82) !important;
   backdrop-filter: blur(25px) saturate(190%) !important;
   -webkit-backdrop-filter: blur(25px) saturate(190%) !important;
   border-radius: 30px !important;
   border: 1px solid rgba(255, 255, 255, 0.4) !important;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25) !important;
-
-  /* Layout */
   height: auto !important;
   max-height: 50vh;
   overflow: hidden !important;
 }
 
-/* Hide drawer logic to remove whitish artifacts when closed */
 .v-navigation-drawer--temporary:not(.v-navigation-drawer--active) {
   display: none !important;
 }
 
-/* 2. Menu Item Styling */
+/* 2. Menu Item Styling & Centering */
 .drawer-list {
   background: transparent !important;
-  padding: 12px !important;
+  padding: 20px 12px !important;
+  /* Adjusted for top/bottom symmetry */
 }
 
 .menu-item {
   margin-bottom: 6px !important;
   border-radius: 15px !important;
+  background: transparent !important;
+  /* Default transparent */
+  transition: background 0.3s ease;
+}
+
+/* Only shows background when route is selected */
+.active-item {
   background: rgba(0, 0, 0, 0.04) !important;
 }
 
-/* 3. Navigation Bar & Hamburger Button */
+/* 3. Logic to center Title Text */
+:deep(.v-list-item__content) {
+  justify-content: center !important;
+}
+
+:deep(.v-list-item-title) {
+  text-align: center !important;
+  width: 100%;
+}
+
+/* 4. Navigation Bar & Hamburger */
 .top-nav-bar {
   z-index: 10001 !important;
-  /* Keep it above the drawer at all times */
 }
 
 .hamburger-btn {
@@ -106,15 +119,12 @@ const appStyle = {
   border-radius: 2px;
   transition: all 0.3s ease;
   background: #ffffff !important;
-  /* White for visibility on your purple background */
 }
 
-/* Change button to dark grey when menu is open for contrast on the white glass */
 .hamburger.is-open span {
   background: #ffffff !important;
 }
 
-/* Animation to 'X' */
 .hamburger span:nth-child(1) {
   top: 0;
 }
@@ -140,13 +150,7 @@ const appStyle = {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* Global Cleanup to ensure background image shows through */
 :deep(.v-application) {
   background: transparent !important;
-}
-
-.custom-footer {
-  background: transparent !important;
-  backdrop-filter: blur(5px);
 }
 </style>
