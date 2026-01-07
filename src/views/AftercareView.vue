@@ -1,11 +1,11 @@
 <template>
-  <v-container fluid class="side-bg fill-height d-flex align-center justify-center" />
+  <v-container fluid class="secondary-bg fill-height d-flex align-center justify-center" />
 </template>
 
 <style scoped>
-.side-bg {
+.secondary-bg {
   /* This points to your uploaded image */
-  background: url('@/assets/side-background.jpg') no-repeat center center;
+  background: url('@/assets/secondary-background.jpg') no-repeat center center;
   background-size: cover;
   width: 100vw;
   height: 100vh;
