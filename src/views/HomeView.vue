@@ -18,7 +18,7 @@
 <style scoped>
 .home-bg {
   /* This points to your uploaded image */
-  background: url('@/assets/hero-bg.jpg') no-repeat center center;
+  background: url('@/assets/home-background.jpg') no-repeat center center;
   background-size: cover;
   width: 100vw;
   height: 100vh;

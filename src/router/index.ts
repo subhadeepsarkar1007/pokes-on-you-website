@@ -23,6 +23,10 @@ const router = createRouter({
       path: '/aftercare',
       name: 'aftercare',
       component: () => import('../views/AftercareView.vue')
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/'
     }
   ]
 })
