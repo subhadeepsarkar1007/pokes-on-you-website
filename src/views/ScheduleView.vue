@@ -156,6 +156,7 @@ const piercingOptions = [
   { label: 'Tongue (₹1000)', price: 1000 },
   { label: 'Industrial (₹1500)', price: 1500 },
   { label: 'Nipple (₹1500)', price: 1500 },
+  { label: 'Surface (₹2000)', price: 2000 },
 ]
 
 // Logic to calculate price for one person
@@ -211,8 +212,8 @@ const availableSlots = computed(() => {
   if (!booking.date) return []
   const d = new Date(booking.date)
   const day = d.getUTCDay()
-  if (day === 1) return ['Closed on Mondays']
-  if (day >= 2 && day <= 5) return ['4:00-4:30']
+  if (day === 0) return ['Closed on Mondays']
+  if (day >= 1 && day <= 4) return ['4:00-4:30']
   if (booking.count === 1) return ['12:00-12:30', '2:00-2:30', '4:00-4:30']
   if (booking.count === 2) return ['12:00-12:30', '3:00-3:30']
   if (booking.count === 3) return ['1:00-2:00']
@@ -222,7 +223,7 @@ const availableSlots = computed(() => {
 const isNotMonday = (date: unknown) => {
   const d = new Date(date as string | number | Date)
   const day = d.getUTCDay()
-  return day !== 1
+  return day !== 0
 }
 
 const allChecked = computed(
