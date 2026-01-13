@@ -6,12 +6,13 @@
     <div class="scroll-wrapper">
       <v-container fluid class="gallery-container">
         <v-row dense>
-          <v-col v-for="(img, index) in images" :key="index" cols="4" sm="4" md="4">
+          <v-col v-for="(img, index) in images" :key="img" cols="4" sm="4" md="4">
             <v-card class="ma-1 gallery-card" flat color="transparent">
-              <v-img :src="img" aspect-ratio="1" cover class="gallery-thumb" @click="open(index)">
+              <v-img :src="img" :lazy-src="img" aspect-ratio="1" cover class="gallery-thumb" loading="lazy"
+                transition="fade-transition" @click="open(index)">
                 <template v-slot:placeholder>
                   <v-row class="fill-height ma-0" align="center" justify="center">
-                    <v-progress-circular indeterminate color="white" />
+                    <v-progress-circular indeterminate color="white" size="20" width="2" />
                   </v-row>
                 </template>
               </v-img>
@@ -27,8 +28,13 @@
               <v-btn icon="mdi-chevron-left" class="nav-btn left" variant="text" @click.stop="prev"></v-btn>
 
               <div class="image-wrapper">
-                <img v-show="!imageLoading" :src="images[selectedIndex]" class="dialog-image" alt="Selected jewelry"
-                  @load="onImageLoad" />
+                <v-img v-show="!imageLoading" :src="images[selectedIndex]" class="dialog-image" @load="onImageLoad">
+                  <template v-slot:placeholder>
+                    <v-row class="fill-height ma-0" align="center" justify="center">
+                      <v-progress-circular indeterminate color="white" />
+                    </v-row>
+                  </template>
+                </v-img>
                 <v-progress-circular v-if="imageLoading" indeterminate color="white" />
               </div>
 
@@ -44,12 +50,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
-// Import images from assets folder
 const modules = import.meta.glob('/src/assets/*.{png,jpg,jpeg,svg,gif,webp}', {
   eager: false,
 }) as Record<string, () => Promise<{ default: string }>>
 
-// Exclude backgrounds and icon from the gallery grid
 const exclude = ['home-background.jpg', 'secondary-background.jpg', 'icon.jpg']
 
 const images = ref<string[]>([])
@@ -58,15 +62,18 @@ const selectedIndex = ref(0)
 const imageLoading = ref(false)
 
 onMounted(async () => {
-  const loaded: string[] = []
-  for (const path in modules) {
+  const loadedUrls: string[] = []
+
+  // Extract paths and filter first
+  const validPaths = Object.keys(modules).filter((path) => {
     const name = path.split('/').pop() || ''
-    if (!exclude.includes(name)) {
-      const mod = await modules[path]()
-      loaded.push(mod.default)
-    }
-  }
-  images.value = loaded
+    return !exclude.includes(name)
+  })
+
+  // Resolve promises in parallel for faster initial data availability
+  const resolvedImages = await Promise.all(validPaths.map((path) => modules[path]()))
+
+  images.value = resolvedImages.map((mod) => mod.default)
 })
 
 function open(index: number) {
@@ -99,7 +106,6 @@ function onImageLoad() {
   flex-direction: column;
 }
 
-/* Background is fixed so the logo stays at the top while content scrolls */
 .secondary-bg-abs {
   background: url('@/assets/secondary-background.jpg') no-repeat center center fixed;
   background-size: cover;
@@ -123,12 +129,13 @@ function onImageLoad() {
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 1;
+  /* Smooth scrolling for mobile */
+  -webkit-overflow-scrolling: touch;
 }
 
 .gallery-container {
   position: relative;
   z-index: 1;
-  /* Adjust this padding to match the height of your logo in the background image */
   padding-top: 5px !important;
   padding-bottom: 60px;
   min-height: 100%;
@@ -142,35 +149,37 @@ function onImageLoad() {
   cursor: pointer;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: transform 0.2s ease;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  /* This ensures the image starts "invisible" if not using fade-transition prop */
 }
 
 .gallery-thumb:hover {
-  transform: scale(1.03);
+  transform: scale(1.05);
+  z-index: 2;
 }
 
 /* Lightbox Styling */
 .glass-morphism {
-  background: rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-radius: 20px !important;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .dialog-image {
   width: 100%;
   max-width: 80vw;
-  max-height: 70vh;
-  object-fit: contain;
-  border-radius: 8px;
+  max-height: 75vh;
+  border-radius: 12px;
 }
 
 .image-wrapper {
-  padding: 40px 10px;
+  padding: 40px 20px;
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 .nav-btn {
@@ -178,20 +187,22 @@ function onImageLoad() {
   top: 50%;
   transform: translateY(-50%);
   z-index: 5;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .nav-btn.left {
-  left: 5px;
+  left: 10px;
 }
 
 .nav-btn.right {
-  right: 5px;
+  right: 10px;
 }
 
 .close-btn {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 15px;
+  right: 15px;
   z-index: 10;
+  background: rgba(255, 255, 255, 0.1);
 }
 </style>
