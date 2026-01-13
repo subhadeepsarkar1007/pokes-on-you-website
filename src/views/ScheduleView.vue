@@ -9,12 +9,12 @@
         <v-form ref="formRef" v-model="valid">
           <div class="input-group mb-4">
             <label class="field-label">Primary Contact Information</label>
-            <v-text-field density="compact" v-model="booking.name" placeholder="Full Name" variant="solo"
-              class="custom-input mb-2" flat hide-details />
-            <v-text-field density="compact" v-model="booking.email" placeholder="Email Address" type="email"
-              variant="solo" class="custom-input mb-2" flat hide-details />
-            <v-text-field density="compact" v-model="booking.phone" placeholder="Contact Number" variant="solo"
-              class="custom-input mb-4" flat hide-details />
+            <v-text-field density="compact" v-model="booking.name" :rules="rules.required" placeholder="Full Name"
+              variant="solo" class="custom-input mb-2" flat />
+            <v-text-field density="compact" v-model="booking.email" :rules="rules.email" placeholder="Email Address"
+              type="email" variant="solo" class="custom-input mb-2" flat />
+            <v-text-field density="compact" v-model="booking.phone" :rules="rules.phone" placeholder="Contact Number"
+              variant="solo" class="custom-input mb-4" flat />
 
             <label class="field-label">Number of People</label>
             <v-select density="compact" v-model="booking.count" :items="[1, 2, 3]" placeholder="Select count"
@@ -34,23 +34,23 @@
               </div>
             </div>
 
-            <v-text-field density="compact" v-model="p.name" placeholder="Person Name" variant="underlined"
-              class="mb-4 custom-input-underlined" hide-details />
+            <v-text-field density="compact" v-model="p.name" :rules="rules.required" placeholder="Person Name"
+              variant="underlined" class="mb-4 custom-input-underlined" />
 
             <label class="field-label-small">Piercing Selections</label>
-            <div v-for="(sel, sIdx) in p.selections" :key="sIdx" class="d-flex align-center mt-2 animate-in">
-              <v-select density="compact" v-model="sel.piercing" :items="piercingOptions" item-title="label"
-                return-object placeholder="Choose Piercing" variant="underlined" hide-details
+            <div v-for="(sel, sIdx) in p.selections" :key="sIdx" class="d-flex align-start mt-2 animate-in">
+              <v-select density="compact" v-model="sel.piercing" :items="piercingOptions" :rules="rules.required"
+                item-title="label" return-object placeholder="Choose Piercing" variant="underlined"
                 class="flex-grow-1 custom-input-underlined" />
 
-              <div class="html-checkbox-wrapper ml-2">
+              <div class="html-checkbox-wrapper ml-2 pt-2">
                 <input type="checkbox" :id="'pair-' + index + '-' + sIdx" v-model="sel.isPair"
                   :disabled="!sel.isPair && getTotalWeight(index) >= 3" />
                 <label :for="'pair-' + index + '-' + sIdx">Pair</label>
               </div>
 
               <v-btn v-if="p.selections.length > 1" size="x-small" variant="text" color="red-lighten-2"
-                class="ml-1 px-0 min-width-0 delete-x-btn" @click="removePiercingField(index, sIdx)">
+                class="ml-2 mt-1 px-0 min-width-0 delete-x-btn" @click="removePiercingField(index, sIdx)">
                 ✕
               </v-btn>
             </div>
@@ -67,17 +67,17 @@
               <v-menu v-model="dateMenu" :close-on-content-click="false" transition="scale-transition">
                 <template v-slot:activator="{ props }">
                   <v-text-field :model-value="formattedDisplayDate" readonly v-bind="props" placeholder="DD/MM/YYYY"
-                    variant="solo" class="custom-input" flat hide-details />
+                    variant="solo" class="custom-input" flat :rules="rules.required" />
                 </template>
-                <v-date-picker v-model="booking.date" @update:model-value="dateMenu = false" :min="todayDate"
+                <v-date-picker v-model="booking.date" @update:model-value="onDateSelected" :min="todayDate"
                   :allowed-dates="isNotMonday" color="#8b76a2"></v-date-picker>
               </v-menu>
             </v-col>
 
             <v-col cols="12" sm="6">
               <label class="field-label">Available Time Slots</label>
-              <v-select v-model="booking.slot" :items="availableSlots" placeholder="Select a time" variant="solo"
-                class="custom-input" flat hide-details :disabled="!booking.date" />
+              <v-select v-model="booking.slot" :items="availableSlots" :rules="rules.required"
+                placeholder="Select a time" variant="solo" class="custom-input" flat :disabled="!booking.date" />
             </v-col>
           </v-row>
 
@@ -87,7 +87,7 @@
           </div>
 
           <v-btn block class="action-btn terms-btn mb-3" elevation="0" @click="termsDialog = true">
-            Review Terms & Policies
+            {{ termsConfirmed ? '✅ Policies Reviewed' : 'Review Terms & Policies' }}
           </v-btn>
 
           <v-btn :disabled="!formReady" block class="action-btn submit-btn" elevation="0" @click="submitForm">
@@ -102,29 +102,21 @@
         <h3 class="text-center mb-4 menu-title">Studio Policies</h3>
         <v-divider class="mb-4"></v-divider>
         <div class="terms-content">
-          <v-radio-group v-model="legal.cancellation" class="compact-radio" hide-details>
-            <v-radio label="I agree to 24h cancellation notice" value="agreed" color="#8b76a2" />
-          </v-radio-group>
-          <div class="terms-content">
-            <div class="html-checkbox-wrapper mb-3">
-              <input type="checkbox" id="cancel" v-model="legal.cancellation" true-value="agreed" false-value="" />
-              <label for="cancel">I agree to 24h cancellation notice</label>
-            </div>
-
-            <div class="html-checkbox-wrapper mb-3">
-              <input type="checkbox" id="noshow" v-model="legal.noshow" />
-              <label for="noshow">I agree to the No-Show policy</label>
-            </div>
-
-            <div class="html-checkbox-wrapper mb-3">
-              <input type="checkbox" id="guidelines" v-model="legal.guidelines" />
-              <label for="guidelines">I agree to health guidelines</label>
-            </div>
-
-            <div class="html-checkbox-wrapper mb-3">
-              <input type="checkbox" id="idPolicy" v-model="legal.idPolicy" />
-              <label for="idPolicy">I will bring a valid Photo ID</label>
-            </div>
+          <div class="html-checkbox-wrapper mb-3">
+            <input type="checkbox" id="cancel" v-model="legal.cancellation" true-value="agreed" false-value="" />
+            <label for="cancel">I agree to 24h cancellation notice</label>
+          </div>
+          <div class="html-checkbox-wrapper mb-3">
+            <input type="checkbox" id="noshow" v-model="legal.noshow" />
+            <label for="noshow">I agree to the No-Show policy</label>
+          </div>
+          <div class="html-checkbox-wrapper mb-3">
+            <input type="checkbox" id="guidelines" v-model="legal.guidelines" />
+            <label for="guidelines">I agree to health guidelines</label>
+          </div>
+          <div class="html-checkbox-wrapper mb-3">
+            <input type="checkbox" id="idPolicy" v-model="legal.idPolicy" />
+            <label for="idPolicy">I will bring a valid Photo ID</label>
           </div>
         </div>
         <v-card-actions class="px-0 mt-6">
@@ -158,6 +150,19 @@ const booking = reactive({
 
 const legal = reactive({ cancellation: '', noshow: false, guidelines: false, idPolicy: false })
 
+// --- Validation Rules ---
+const rules = {
+  required: [(v: any) => !!v || 'Field is required'],
+  email: [
+    (v: string) => !!v || 'Email is required',
+    (v: string) => /.+@.+\..+/.test(v) || 'E-mail must be valid',
+  ],
+  phone: [
+    (v: string) => !!v || 'Phone is required',
+    (v: string) => /^\d{10}$/.test(v) || 'Phone must be 10 digits',
+  ],
+}
+
 const piercingOptions = [
   { label: 'Lobe (₹500)', price: 500 },
   { label: 'Nose (₹500)', price: 500 },
@@ -180,7 +185,6 @@ const piercingOptions = [
   { label: 'Surface (₹2000)', price: 2000 },
 ]
 
-// Logic to calculate price for one person
 const getPersonTotal = (pIndex: number) => {
   return booking.piercees[pIndex].selections.reduce((sum, sel) => {
     const basePrice = sel.piercing?.price || 0
@@ -188,7 +192,6 @@ const getPersonTotal = (pIndex: number) => {
   }, 0)
 }
 
-// Logic for grand total
 const grandTotal = computed(() => {
   return booking.piercees.reduce((sum, _, index) => sum + getPersonTotal(index), 0)
 })
@@ -196,16 +199,11 @@ const grandTotal = computed(() => {
 const formattedDisplayDate = computed(() => {
   if (!booking.date) return ''
   const d = new Date(booking.date)
-  const day = String(d.getDate()).padStart(2, '0')
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const year = d.getFullYear()
-  return `${day}/${month}/${year}`
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`
 })
 
 const getTotalWeight = (pIndex: number) => {
-  return booking.piercees[pIndex].selections.reduce((sum, sel) => {
-    return sum + (sel.isPair ? 2 : 1)
-  }, 0)
+  return booking.piercees[pIndex].selections.reduce((sum, sel) => sum + (sel.isPair ? 2 : 1), 0)
 }
 
 const addPiercingField = (pIndex: number) => {
@@ -218,7 +216,10 @@ const removePiercingField = (pIndex: number, sIndex: number) => {
   booking.piercees[pIndex].selections.splice(sIndex, 1)
 }
 
+// --- Clearing Trigger 1: Change in headcount ---
 const syncPiercees = (val: number) => {
+  booking.date = null // Reset date
+  booking.slot = '' // Reset slot
   const diff = val - booking.piercees.length
   if (diff > 0) {
     for (let i = 0; i < diff; i++) {
@@ -227,6 +228,12 @@ const syncPiercees = (val: number) => {
   } else {
     booking.piercees.splice(val)
   }
+}
+
+// --- Clearing Trigger 2: Change in Date ---
+const onDateSelected = () => {
+  dateMenu.value = false
+  booking.slot = '' // Reset slot
 }
 
 const availableSlots = computed(() => {
@@ -241,20 +248,16 @@ const availableSlots = computed(() => {
   return []
 })
 
-const isNotMonday = (date: unknown) => {
-  const d = new Date(date as string | number | Date)
-  const day = d.getUTCDay()
-  return day !== 0
-}
+const isNotMonday = (date: any) => new Date(date).getUTCDay() !== 0
 
 const allChecked = computed(
   () => legal.cancellation && legal.noshow && legal.guidelines && legal.idPolicy,
 )
 
 const formReady = computed(() => {
-  const basicInfo = booking.name && booking.email && booking.date && booking.slot
   const slotValid = booking.slot && !booking.slot.includes('Closed')
-  return basicInfo && slotValid && termsConfirmed.value
+  // Valid is the v-model from v-form
+  return valid.value && slotValid && termsConfirmed.value
 })
 
 const confirmTerms = () => {
@@ -266,7 +269,7 @@ const submitForm = () => alert('Booking submitted successfully!')
 </script>
 
 <style scoped>
-/* Added Styles for Pricing */
+/* Pricing & Layout */
 .price-tag {
   background: #8b76a2;
   color: white;
@@ -283,9 +286,9 @@ const submitForm = () => alert('Booking submitted successfully!')
   color: #4a4a4a;
 }
 
-/* Original Styles */
 .secondary-bg-abs {
-  background: url('@/assets/secondary-background.jpg') no-repeat center center fixed;
+  background: #f4f1f7;
+  /* Fallback */
   background-size: cover;
   width: 100vw;
   height: 100vh;
@@ -298,7 +301,7 @@ const submitForm = () => alert('Booking submitted successfully!')
 .form-container {
   position: relative;
   z-index: 1;
-  padding-top: 140px;
+  padding-top: 40px;
   max-width: 500px;
   padding-bottom: 60px;
 }
@@ -354,7 +357,8 @@ const submitForm = () => alert('Booking submitted successfully!')
 }
 
 .delete-x-btn {
-  font-size: 1.2rem !important;
+  padding-top: 2px !important;
+  font-size: 1rem !important;
   font-weight: bold !important;
   min-width: 32px !important;
 }
@@ -380,7 +384,6 @@ const submitForm = () => alert('Booking submitted successfully!')
   font-weight: bold;
 }
 
-/* Styling the HTML Checkbox */
 .html-checkbox-wrapper {
   display: flex;
   align-items: center;
@@ -394,25 +397,5 @@ const submitForm = () => alert('Booking submitted successfully!')
   width: 18px;
   height: 18px;
   accent-color: #8b76a2;
-  /* Matches your theme purple */
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-
-.html-checkbox-wrapper label {
-  cursor: pointer;
-  user-select: none;
-}
-
-.html-checkbox-wrapper input[type='checkbox']:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-/* Adjusting the container for piercing selection to align items */
-.animate-in {
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 </style>
