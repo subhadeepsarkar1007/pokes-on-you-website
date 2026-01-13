@@ -30,21 +30,27 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import bg from '@/assets/home-background.jpg'
 
 const drawer = ref(false)
 
 const appStyle = {
-  backgroundImage: `url(${bg})`,
-  backgroundSize: 'cover',
-  backgroundAttachment: 'fixed',
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'center center',
+  backgroundColor: '#d8d9f7', // Set your hex color here
+  minHeight: '100vh', // Ensure it covers the full viewport height
 }
 </script>
 
 <style scoped>
 /* 1. Centered Floating Menu Styling */
+/* Update this section in your <style scoped> */
+:deep(.v-application) {
+  background-color: #d8d9f7 !important;
+}
+
+/* Ensure the main container doesn't have a white background */
+:deep(.v-application__wrap) {
+  background-color: transparent !important;
+}
+
 .custom-drawer {
   top: 8% !important;
   margin: 0 20px !important;
