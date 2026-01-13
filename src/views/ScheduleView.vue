@@ -43,8 +43,11 @@
                 return-object placeholder="Choose Piercing" variant="underlined" hide-details
                 class="flex-grow-1 custom-input-underlined" />
 
-              <v-checkbox v-model="sel.isPair" label="Pair" density="compact" color="purple" hide-details
-                :disabled="!sel.isPair && getTotalWeight(index) >= 3" />
+              <div class="html-checkbox-wrapper ml-2">
+                <input type="checkbox" :id="'pair-' + index + '-' + sIdx" v-model="sel.isPair"
+                  :disabled="!sel.isPair && getTotalWeight(index) >= 3" />
+                <label :for="'pair-' + index + '-' + sIdx">Pair</label>
+              </div>
 
               <v-btn v-if="p.selections.length > 1" size="x-small" variant="text" color="red-lighten-2"
                 class="ml-1 px-0 min-width-0 delete-x-btn" @click="removePiercingField(index, sIdx)">
@@ -102,9 +105,27 @@
           <v-radio-group v-model="legal.cancellation" class="compact-radio" hide-details>
             <v-radio label="I agree to 24h cancellation notice" value="agreed" color="#8b76a2" />
           </v-radio-group>
-          <v-checkbox v-model="legal.noshow" label="I agree to the No-Show policy" hide-details />
-          <v-checkbox v-model="legal.guidelines" label="I agree to health guidelines" hide-details />
-          <v-checkbox v-model="legal.idPolicy" label="I will bring a valid Photo ID" hide-details />
+          <div class="terms-content">
+            <div class="html-checkbox-wrapper mb-3">
+              <input type="checkbox" id="cancel" v-model="legal.cancellation" true-value="agreed" false-value="" />
+              <label for="cancel">I agree to 24h cancellation notice</label>
+            </div>
+
+            <div class="html-checkbox-wrapper mb-3">
+              <input type="checkbox" id="noshow" v-model="legal.noshow" />
+              <label for="noshow">I agree to the No-Show policy</label>
+            </div>
+
+            <div class="html-checkbox-wrapper mb-3">
+              <input type="checkbox" id="guidelines" v-model="legal.guidelines" />
+              <label for="guidelines">I agree to health guidelines</label>
+            </div>
+
+            <div class="html-checkbox-wrapper mb-3">
+              <input type="checkbox" id="idPolicy" v-model="legal.idPolicy" />
+              <label for="idPolicy">I will bring a valid Photo ID</label>
+            </div>
+          </div>
         </div>
         <v-card-actions class="px-0 mt-6">
           <v-btn variant="text" @click="termsDialog = false" class="text-none">Go Back</v-btn>
@@ -357,5 +378,41 @@ const submitForm = () => alert('Booking submitted successfully!')
 .text-error {
   color: #d32f2f;
   font-weight: bold;
+}
+
+/* Styling the HTML Checkbox */
+.html-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #4a4a4a;
+}
+
+.html-checkbox-wrapper input[type='checkbox'] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  accent-color: #8b76a2;
+  /* Matches your theme purple */
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.html-checkbox-wrapper label {
+  cursor: pointer;
+  user-select: none;
+}
+
+.html-checkbox-wrapper input[type='checkbox']:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Adjusting the container for piercing selection to align items */
+.animate-in {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 </style>
