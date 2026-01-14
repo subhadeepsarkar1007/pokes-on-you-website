@@ -9,11 +9,10 @@
     <v-container class="form-container">
       <v-card class="custom-glass-card pa-6" elevation="0">
         <div v-if="submitted" class="confirmation-view animate-in">
-          <h2 class="text-center mb-6 menu-title">Booking Confirmed</h2>
+          <h2 class="text-center mb-6 menu-title">Booking Confirmation</h2>
 
           <div class="status-badge mb-6">
-            <v-icon color="success" size="large">mdi-check-circle</v-icon>
-            <span class="ml-2">Request Received</span>
+            <span>✅Request Received</span>
           </div>
 
           <div class="confirmation-details mb-6">
@@ -23,7 +22,11 @@
             </div>
             <div class="detail-row">
               <span class="label">Appointment:</span>
-              <span class="value">{{ formattedDisplayDate }} at {{ booking.slot }}</span>
+              <span>
+                <div class="value">{{ formattedDisplayDate }}</div>
+                <div class="value">{{ booking.slot }}</div>
+              </span>
+              <!-- <span class="value">{{ formattedDisplayDate }} at {{ booking.slot }}</span> -->
             </div>
           </div>
 
@@ -260,8 +263,15 @@ const grandTotal = computed(() => {
 
 const formattedDisplayDate = computed(() => {
   if (!booking.date) return ''
+
   const d = new Date(booking.date)
-  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`
+
+  return d.toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
 })
 
 const getTotalWeight = (pIndex: number) => {
@@ -491,8 +501,10 @@ const submitForm = async () => {
 }
 
 .detail-row .value {
-  font-weight: 700;
+  font-weight: 500;
   color: #4a4a4a;
+  display: flex;
+  flex-direction: row-reverse;
 }
 
 .summary-card {
