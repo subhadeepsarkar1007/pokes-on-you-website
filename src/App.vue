@@ -12,12 +12,14 @@
 
     <v-navigation-drawer v-model="drawer" temporary location="top" class="custom-drawer" elevation="0">
       <v-list nav class="drawer-list">
-        <v-list-item to="/" @click="drawer = false" title="Home" class="menu-item" active-class="active-item" />
-        <v-list-item to="/schedule" @click="drawer = false" title="Schedule Appointment" class="menu-item"
+        <v-list-item to="/" @click="handleNavClick" title="Home" class="menu-item" active-class="active-item" />
+        <v-list-item to="/schedule" @click="handleNavClick" title="Schedule Appointment" class="menu-item"
           active-class="active-item" />
-        <v-list-item to="/gallery" @click="drawer = false" title="Jewellery Designs" class="menu-item"
+        <v-list-item to="/gallery" @click="handleNavClick" title="Jewellery Designs" class="menu-item"
           active-class="active-item" />
-        <v-list-item to="/aftercare" @click="drawer = false" title="Aftercare Tips" class="menu-item"
+        <v-list-item to="/guidelines" @click="handleNavClick" title="Guidelines" class="menu-item"
+          active-class="active-item" />
+        <v-list-item to="/aftercare" @click="handleNavClick" title="Aftercare Tips" class="menu-item"
           active-class="active-item" />
       </v-list>
     </v-navigation-drawer>
@@ -30,12 +32,18 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { allowNavigation } from './router/index'
 
 const drawer = ref(false)
 
 const appStyle = {
   backgroundColor: '#d8d9f7', // Set your hex color here
   minHeight: '100vh', // Ensure it covers the full viewport height
+}
+
+const handleNavClick = () => {
+  allowNavigation() // Set the flag to true
+  drawer.value = false
 }
 </script>
 
