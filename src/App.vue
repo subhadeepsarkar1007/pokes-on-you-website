@@ -42,9 +42,9 @@ const appStyle = {
 }
 
 const handleNavClick = () => {
-  allowNavigation() // Set the flag to true
-  drawer.value = false
-}
+  allowNavigation();
+  drawer.value = false;
+};
 </script>
 
 <style scoped>

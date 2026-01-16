@@ -190,6 +190,8 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive } from 'vue'
+import { db } from '../firebase'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 
 const formRef = ref<any>(null)
 const valid = ref(false)
@@ -336,18 +338,30 @@ const closeTerms = () => {
   showTermsError.value = false
 }
 
+
+
 const submitForm = async () => {
   const { valid: isFormValid } = await formRef.value.validate()
   if (!isFormValid) return
 
   if (!termsConfirmed.value) {
-    showTermsError.value = true
-    termsDialog.value = true
+    showTermsError.value = true;
+    termsDialog.value = true;
     return
   }
 
-  // Toggle the view
-  submitted.value = true
+  try {
+    // Save to Firebase
+    await addDoc(collection(db, "appointments"), {
+      ...booking,
+      createdAt: serverTimestamp() // Adds a timestamp for sorting
+    });
+
+    submitted.value = true;
+  } catch (e) {
+    console.error("Error adding document: ", e);
+    alert("Failed to save booking. Please try again.");
+  }
 }
 </script>
 
