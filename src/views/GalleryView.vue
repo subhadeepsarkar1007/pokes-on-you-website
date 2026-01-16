@@ -7,8 +7,21 @@
     </div>
 
     <v-container fluid class="gallery-container">
+      <div class="filter-wrapper d-flex flex-wrap justify-center mb-6">
+        <v-chip :class="['ma-1 filter-chip', !selectedFilter ? 'active-chip' : 'glass-chip']" elevation="0"
+          @click="selectedFilter = null">
+          #all
+        </v-chip>
+
+        <v-chip v-for="tag in filterTags" :key="tag"
+          :class="['ma-1 filter-chip', selectedFilter === tag ? 'active-chip' : 'glass-chip']" elevation="0"
+          @click="toggleFilter(tag)">
+          #{{ tag }}
+        </v-chip>
+      </div>
+
       <v-row dense>
-        <v-col v-for="(img, index) in images" :key="img" cols="4" sm="4" md="4">
+        <v-col v-for="(img, index) in filteredImages" :key="img" cols="4" sm="4" md="4">
           <v-card class="ma-1 gallery-card" flat color="transparent">
             <v-img :src="img" aspect-ratio="1" cover class="gallery-thumb loading-blur" loading="lazy"
               @click="open(index)" @load="(e) => e.target.closest('.v-img').classList.remove('loading-blur')">
@@ -20,15 +33,24 @@
         </v-col>
       </v-row>
 
+      <v-row v-if="filteredImages.length === 0" justify="center" class="mt-10 animate-in">
+        <v-col cols="12" class="text-center">
+          <v-icon color="#7b62a3" size="48">mdi-image-search-outline</v-icon>
+          <p class="text-subtitle-1 mt-2" style="color: #444; font-weight: 500;">
+            No images found for #{{ selectedFilter }}
+          </p>
+        </v-col>
+      </v-row>
+
       <v-dialog v-model="dialog" max-width="90vw" @click:outside="dialog = false">
-        <v-card class="dialog-card glass-morphism" flat @click="dialog = false">
+        <v-card class="dialog-card glass-morphism-dialog" flat @click="dialog = false">
           <v-card-text class="pa-0 d-flex align-center justify-center">
             <div class="image-wrapper">
-              <v-img :src="images[selectedIndex]" class="dialog-image" content-class="custom-img-fit"
+              <v-img :src="filteredImages[selectedIndex]" class="dialog-image" content-class="custom-img-fit"
                 transition="fade-transition">
                 <template v-slot:placeholder>
                   <v-row class="fill-height ma-0" align="center" justify="center">
-                    <v-progress-circular indeterminate color="#8b76a2" />
+                    <v-progress-circular indeterminate color="#7b62a3" />
                   </v-row>
                 </template>
               </v-img>
@@ -41,15 +63,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 const modules = import.meta.glob('/src/assets/*.{png,jpg,jpeg,svg,gif,webp}', {
   eager: false,
 }) as Record<string, () => Promise<{ default: string }>>
 
 const exclude = ['logo.jpg', 'icon.jpg']
+const filterTags = ['hiddenhelix', 'hanginghelix', 'traditionalnavel', 'floatingnavel']
 
-const images = ref<string[]>([])
+interface GalleryImage {
+  url: string
+  name: string
+}
+
+const allImages = ref<GalleryImage[]>([])
+const selectedFilter = ref<string | null>(null)
 const dialog = ref(false)
 const selectedIndex = ref(0)
 
@@ -59,9 +88,28 @@ onMounted(async () => {
     return !exclude.includes(name)
   })
 
-  const resolvedImages = await Promise.all(validPaths.map((path) => modules[path]()))
-  images.value = resolvedImages.map((mod) => mod.default)
+  const resolvedImages = await Promise.all(
+    validPaths.map(async (path) => {
+      const mod = await modules[path]()
+      return {
+        url: mod.default,
+        name: path.split('/').pop()?.toLowerCase() || ''
+      }
+    })
+  )
+  allImages.value = resolvedImages
 })
+
+const filteredImagesList = computed(() => {
+  if (!selectedFilter.value) return allImages.value
+  return allImages.value.filter(img => img.name.includes(selectedFilter.value!.toLowerCase()))
+})
+
+const filteredImages = computed(() => filteredImagesList.value.map(img => img.url))
+
+function toggleFilter(tag: string) {
+  selectedFilter.value = selectedFilter.value === tag ? null : tag
+}
 
 function open(index: number) {
   selectedIndex.value = index
@@ -70,7 +118,7 @@ function open(index: number) {
 </script>
 
 <style scoped>
-/* Layout Styles Stay the Same */
+/* Base Layout */
 .page-container {
   width: 100%;
   min-height: 100vh;
@@ -87,19 +135,6 @@ function open(index: number) {
   z-index: 0;
 }
 
-.top-spacer {
-  height: 80px;
-  flex-shrink: 0;
-  z-index: 2;
-  position: relative;
-}
-
-.scroll-wrapper {
-  flex: 1;
-  overflow: visible;
-  z-index: 1;
-}
-
 .logo-wrapper {
   display: flex;
   justify-content: center;
@@ -111,7 +146,6 @@ function open(index: number) {
 
 .scrollable-logo {
   height: 180px;
-  /* Adjusted for better viewport fit */
   width: auto;
   object-fit: contain;
 }
@@ -122,51 +156,76 @@ function open(index: number) {
   padding-bottom: 80px;
 }
 
-/* NEW: HAZY LOADING LOGIC */
+/* Filter Section */
+.filter-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 10px 0;
+}
 
-/* 1. The initial state: Blurred and slightly desaturated */
+/* NEW Glass Morphism for Chips */
+.filter-chip {
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 15px !important;
+}
+
+/* Default State: Glass Morphism with Black Text */
+.glass-chip {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03);
+}
+
+/* Active State: Lavender Shade */
+.active-chip {
+  background: #7b62a3 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(123, 98, 163, 0.3) !important;
+}
+
+/* Gallery Grid Styles */
 .gallery-thumb {
   cursor: pointer;
   border-radius: 12px;
-  background: rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease-in-out;
+  background: rgba(255, 255, 255, 0.2);
+  transition: transform 0.2s ease;
   overflow: hidden;
-}
-
-/* We target the internal image element directly */
-.loading-blur :deep(.v-img__img) {
-  filter: blur(15px) grayscale(20%);
-  transform: scale(1.1);
-  /* Slightly zoom to hide blurred edges */
-}
-
-/* 2. The finished state: Transition to clear */
-.gallery-thumb :deep(.v-img__img) {
-  filter: blur(0px) grayscale(0%);
-  transform: scale(1);
-  transition:
-    filter 0.8s ease-out,
-    transform 0.8s ease-out;
-}
-
-.placeholder-skeleton {
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.1);
 }
 
 .gallery-thumb:hover {
   transform: scale(1.02);
 }
 
-/* Dialog Styles */
-.glass-morphism {
+/* Hazy Loading */
+.loading-blur :deep(.v-img__img) {
+  filter: blur(15px) grayscale(20%);
+  transform: scale(1.1);
+}
+
+.gallery-thumb :deep(.v-img__img) {
+  filter: blur(0px) grayscale(0%);
+  transform: scale(1);
+  transition: filter 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.placeholder-skeleton {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Dialog Glass Morphism */
+.glass-morphism-dialog {
   background: rgba(255, 255, 255, 0.45);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  border-radius: 50px;
+  border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03);
 }
 
 .image-wrapper {
@@ -175,16 +234,29 @@ function open(index: number) {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 10px;
+  padding: 15px;
 }
 
 .dialog-image {
-  max-width: 100%;
+  border-radius: 12px;
   max-height: 80vh;
-  border-radius: 8px;
 }
 
 :deep(.custom-img-fit) {
   object-fit: contain !important;
+}
+
+.animate-in {
+  animation: fadeIn 0.5s ease-out both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 </style>
