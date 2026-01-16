@@ -161,9 +161,12 @@ function open(index: number) {
 
 /* Dialog Styles */
 .glass-morphism {
-  background: rgba(255, 255, 255, 0.82) !important;
-  backdrop-filter: blur(25px) saturate(190%) !important;
-  border-radius: 20px !important;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03);
 }
 
 .image-wrapper {

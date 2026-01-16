@@ -188,9 +188,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 import { db } from '../firebase'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, } from 'firebase/firestore'
 
 const formRef = ref<any>(null)
 const valid = ref(false)
@@ -200,6 +200,7 @@ const termsConfirmed = ref(false)
 const showTermsError = ref(false)
 const dateMenu = ref(false)
 const todayDate = new Date()
+const appointments = ref<any[]>([])
 
 const maxDate = computed(() => {
   const d = new Date()
@@ -368,6 +369,14 @@ const submitForm = async () => {
     alert("Failed to save booking. Please try again.");
   }
 }
+
+onMounted(() => {
+  const q = query(collection(db, "appointments"), orderBy("createdAt", "desc"));
+  onSnapshot(q, (snapshot) => {
+    appointments.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  });
+})
+
 </script>
 
 <style scoped>
@@ -410,10 +419,12 @@ const submitForm = async () => {
 }
 
 .custom-glass-card {
-  background: rgba(255, 255, 255, 0.82) !important;
-  backdrop-filter: blur(25px) saturate(190%) !important;
-  border-radius: 30px !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03);
 }
 
 .menu-title {
