@@ -86,9 +86,8 @@
               </div>
             </div>
 
-            <v-text-field density="compact" v-model="p.name" :rules="rules.required" placeholder="Person Name"
-              variant="underlined" class="mb-4 custom-input-underlined" />
-
+            <v-text-field density="compact" v-model="p.name" :rules="rules.required"
+              :placeholder="`Person ${index + 1} Name`" variant="underlined" class="mb-4 custom-input-underlined" />
             <label class="field-label-small">Piercing Selections</label>
             <div v-for="(sel, sIdx) in p.selections" :key="sIdx" class="d-flex align-center mt-2 animate-in">
               <v-select density="compact" v-model="sel.piercing" :items="piercingOptions" :rules="rules.required"

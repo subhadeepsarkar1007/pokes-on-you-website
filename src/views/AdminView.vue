@@ -1,31 +1,67 @@
 <template>
   <div class="page-container">
     <div class="secondary-bg-abs" aria-hidden="true"></div>
-    <v-container class="admin-container">
-      <v-card class="glass-card pa-4">
-        <h2 class="mb-4">Appointment Dashboard</h2>
 
-        <v-data-table :headers="headers" :items="appointments" item-value="id" show-expand class="transparent-table"
-          items-per-page="-1" hide-default-footer>
-          <template v-slot:item.date="{ item }">
-            {{ formatDate(item.date) }}
+    <v-container class="admin-container">
+      <v-card class="custom-glass-card">
+
+
+        <v-data-table v-model:expanded="expandedRows" :items="appointments" item-value="id" show-expand
+          class="transparent-table" items-per-page="-1" hide-default-footer :headers="headers">
+          <template v-slot:item="{ internalItem, item, index, toggleExpand, isExpanded }">
+            <tr :class="index % 2 === 0 ? 'row-even' : 'row-odd'" class="mobile-row">
+              <td class="pa-4">
+                <div class="d-flex justify-space-between align-center">
+                  <div @click="toggleExpand(internalItem)" class="flex-grow-1 cursor-pointer">
+                    <div class="text-subtitle-1 font-weight-bold text-primary">
+                      {{ item.name }}
+                    </div>
+                    <div class="text-caption font-weight-medium">
+                      <v-icon size="14" class="mr-1">mdi-calendar</v-icon>
+                      {{ formatDate(item.date) }} • {{ item.slot }}
+                    </div>
+                  </div>
+
+                  <div class="d-flex align-center">
+                    <v-chip size="x-small" color="primary" variant="flat" class="mr-2">
+                      {{ item.count }}
+                    </v-chip>
+
+                    <v-btn :icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'" variant="text"
+                      density="comfortable" @click="toggleExpand(internalItem)"></v-btn>
+                  </div>
+                </div>
+              </td>
+            </tr>
           </template>
 
           <template v-slot:expanded-row="{ columns, item }">
             <tr>
-              <td :colspan="columns.length" class="pa-4 bg-light">
-                <div class="detail-grid">
-                  <div v-for="(p, idx) in item.piercees" :key="idx" class="mb-3">
-                    <strong>Person {{ idx + 1 }}: {{ p.name }}</strong>
-                    <div class="text-caption">
+              <td :colspan="columns.length" class="pa-0 border-0">
+                <div class="expanded-detail-box">
+                  <div v-for="(p, idx) in item.piercees" :key="idx" class="person-card mb-3">
+                    <div class="d-flex align-center mb-1">
+                      <v-icon size="16" class="mr-2" color="primary">mdi-account-outline</v-icon>
+                      <strong>{{ p.name }}</strong>
+                    </div>
+                    <div class="text-caption pl-6 text-grey-darken-2">
                       {{p.selections.map(s => `${s.piercing.label}${s.isPair ? ' (Pair)' : ''}`).join(', ')}}
                     </div>
                   </div>
-                  <v-divider class="my-2"></v-divider>
-                  <div class="d-flex justify-space-between align-center">
-                    <span>Contact: {{ item.phone }} | {{ item.email }}</span>
-                    <v-btn color="red-lighten-1" size="small" @click="confirmDelete(item.id)">
-                      Delete Entry
+
+                  <v-divider class="my-3"></v-divider>
+
+                  <div class="d-flex flex-column gap-2">
+                    <div class="text-caption d-flex align-center mb-1">
+                      <v-icon size="14" class="mr-2">mdi-phone</v-icon> {{ item.phone }}
+                    </div>
+                    <div class="text-caption d-flex align-center">
+                      <v-icon size="14" class="mr-2">mdi-email</v-icon> {{ item.email }}
+                    </div>
+                    <v-btn color="red-lighten-4" class="text-red-darken-4 mt-4" flat block size="small"
+                      @click="confirmDelete(item.id)">
+                      <v-icon start icon="mdi-delete" size="16"></v-icon>
+                      Delete Appointment
                     </v-btn>
                   </div>
                 </div>
@@ -36,14 +72,15 @@
       </v-card>
     </v-container>
 
-    <v-dialog v-model="deleteDialog" max-width="400">
+    <v-dialog v-model="deleteDialog" max-width="340">
       <v-card class="pa-4 rounded-xl">
-        <v-card-title>Confirm Deletion</v-card-title>
-        <v-card-text>Are you sure you want to remove this appointment? This action cannot be undone.</v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
+        <v-card-title class="text-center">Delete Entry?</v-card-title>
+        <v-card-text class="text-center text-body-2">
+          This will permanently remove this appointment.
+        </v-card-text>
+        <v-card-actions class="justify-center">
           <v-btn variant="text" @click="deleteDialog = false">Cancel</v-btn>
-          <v-btn color="red" @click="deleteEntry">Delete</v-btn>
+          <v-btn color="red-darken-1" variant="elevated" @click="deleteEntry">Delete</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -56,18 +93,14 @@ import { db } from '../firebase'
 import { collection, query, orderBy, onSnapshot, doc, deleteDoc } from 'firebase/firestore'
 
 const appointments = ref<any[]>([])
+const expandedRows = ref([]) // Necessary to track expansion state
 const deleteDialog = ref(false)
 const selectedId = ref('')
 
 const headers = [
-  { title: 'Customer', key: 'name' },
-  { title: 'Date', key: 'date' },
-  { title: 'Slot', key: 'slot' },
-  { title: 'People', key: 'count' },
-  { title: '', key: 'data-table-expand' },
+  { title: 'Appointments', key: 'data-table-expand' },
 ]
 
-// Real-time listener for appointments
 onMounted(() => {
   const q = query(collection(db, "appointments"), orderBy("createdAt", "desc"));
   onSnapshot(q, (snapshot) => {
@@ -78,7 +111,7 @@ onMounted(() => {
 const formatDate = (date: any) => {
   if (!date) return 'N/A';
   const d = date.toDate ? date.toDate() : new Date(date);
-  return d.toLocaleDateString();
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
 }
 
 const confirmDelete = (id: string) => {
@@ -97,18 +130,61 @@ const deleteEntry = async () => {
 </script>
 
 <style scoped>
-/* Include your existing page-container and secondary-bg-abs styles here */
 .admin-container {
-  position: relative;
-  z-index: 1;
-  margin-top: 40px;
+  max-width: 100%;
+  padding: 16px;
+  padding-bottom: 100px;
+}
+
+:deep(.v-data-table-header) {
+  display: none;
 }
 
 .transparent-table {
   background: transparent !important;
 }
 
-.bg-light {
-  background: rgba(0, 0, 0, 0.03);
+.row-even {
+  background: rgba(255, 255, 255, 0.5) !important;
+}
+
+.row-odd {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.mobile-row {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.expanded-detail-box {
+  background: rgba(0, 0, 0, 0.04);
+  padding: 20px;
+  margin: 12px;
+  border-radius: 16px;
+}
+
+.person-card {
+  background: white;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.custom-glass-card {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(25px) saturate(190%) !important;
+  border-radius: 30px !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  /* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+  overflow: hidden; */
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Remove standard border from expanded cell */
+:deep(.v-data-table__expanded-row td) {
+  border-bottom: none !important;
 }
 </style>
