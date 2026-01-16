@@ -73,7 +73,27 @@
               variant="solo" class="custom-input mb-4" flat hide-details @update:model-value="syncPiercees" />
           </div>
 
-          <div v-for="(p, index) in booking.piercees" :key="index" class="piercee-section pa-4 mb-4">
+          <v-row dense>
+            <v-col cols="12" sm="6">
+              <label class="field-label">Preferred Date</label>
+              <v-menu v-model="dateMenu" :close-on-content-click="false" transition="scale-transition">
+                <template v-slot:activator="{ props }">
+                  <v-text-field :model-value="formattedDisplayDate" readonly v-bind="props" placeholder="DD/MM/YYYY"
+                    variant="solo" class="custom-input" flat :rules="rules.required" />
+                </template>
+                <v-date-picker v-model="booking.date" @update:model-value="onDateSelected" :min="todayDate"
+                  :max="maxDate" :allowed-dates="isNotMonday" color="#8b76a2"></v-date-picker>
+              </v-menu>
+            </v-col>
+
+            <v-col cols="12" sm="6">
+              <label class="field-label">Available Time Slots</label>
+              <v-select v-model="booking.slot" :items="availableSlots" :rules="rules.required"
+                placeholder="Select a time" variant="solo" class="custom-input" flat :disabled="!booking.date" />
+            </v-col>
+          </v-row>
+
+          <div v-for="(p, index) in booking.piercees" :key="index" class="piercee-section pa-4 mb-6">
             <div class="d-flex justify-space-between align-center mb-2">
               <div>
                 <label class="section-title">Piercee #{{ index + 1 }}</label>
@@ -115,26 +135,6 @@
               + Add Piercing
             </v-btn>
           </div>
-
-          <v-row dense class="mb-4">
-            <v-col cols="12" sm="6">
-              <label class="field-label">Preferred Date</label>
-              <v-menu v-model="dateMenu" :close-on-content-click="false" transition="scale-transition">
-                <template v-slot:activator="{ props }">
-                  <v-text-field :model-value="formattedDisplayDate" readonly v-bind="props" placeholder="DD/MM/YYYY"
-                    variant="solo" class="custom-input" flat :rules="rules.required" />
-                </template>
-                <v-date-picker v-model="booking.date" @update:model-value="onDateSelected" :min="todayDate"
-                  :allowed-dates="isNotMonday" color="#8b76a2"></v-date-picker>
-              </v-menu>
-            </v-col>
-
-            <v-col cols="12" sm="6">
-              <label class="field-label">Available Time Slots</label>
-              <v-select v-model="booking.slot" :items="availableSlots" :rules="rules.required"
-                placeholder="Select a time" variant="solo" class="custom-input" flat :disabled="!booking.date" />
-            </v-col>
-          </v-row>
 
           <div v-if="grandTotal > 0" class="grand-total-section mb-6 pa-3 d-flex justify-space-between align-center">
             <span class="text-uppercase font-weight-bold">Total Est. Amount</span>
@@ -200,6 +200,12 @@ const termsConfirmed = ref(false)
 const showTermsError = ref(false)
 const dateMenu = ref(false)
 const todayDate = new Date()
+
+const maxDate = computed(() => {
+  const d = new Date()
+  d.setDate(d.getDate() + 30)
+  return d
+})
 
 const booking = reactive({
   name: '',
