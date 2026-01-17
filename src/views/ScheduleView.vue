@@ -419,12 +419,12 @@ onMounted(() => {
 }
 
 .custom-glass-card {
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03);
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(25px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(190%) !important;
+  border-radius: 30px !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25) !important;
 }
 
 .menu-title {

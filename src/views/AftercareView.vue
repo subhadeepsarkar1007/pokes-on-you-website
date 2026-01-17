@@ -26,13 +26,8 @@
           <li>Avoid applying ointments, betadine, or alcohol to your piercings.</li>
           <li>Avoid harsh soap, shampoo, face wash, makeup, or any chemical products around your piercings for a few
             days.</li>
-        </ul>
-
-        <v-divider class="my-8 custom-divider"></v-divider>
-
-        <ul class="guideline-list mb-6">
           <li>Avoid sour and spicy food for the first few days.</li>
-          <li>Avoid pools and beaches for a month after getting pierced.</li>
+          <li>Avoid pools and beaches, any public water bodies for a month after getting pierced.</li>
           <li>Keep your piercings at a safe distance from pets.</li>
           <li>Keep a check for migration or rejection.</li>
           <li>Contact your piercer or a doctor for serious complications.</li>
@@ -67,17 +62,11 @@
         <div class="d-flex justify-center mb-6">
           <v-btn variant="outlined" color="primary" href="https://safepiercing.org/aftercare/" target="_blank"
             rounded="lg">
-            <v-icon start>mdi-link</v-icon>
             SafePiercing.org Aftercare
           </v-btn>
         </div>
       </v-card>
 
-      <div class="d-flex justify-center pb-10">
-        <v-btn color="#8b76a2" size="large" rounded="xl" class="text-white px-10" to="/booking">
-          I Understand & Continue
-        </v-btn>
-      </div>
     </v-container>
   </div>
 </template>
@@ -121,12 +110,12 @@
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03);
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(25px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(190%) !important;
+  border-radius: 30px !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25) !important;
 }
 
 .section-title {
