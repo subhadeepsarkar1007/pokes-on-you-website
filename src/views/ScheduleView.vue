@@ -446,17 +446,84 @@ const onDateSelected = () => {
   booking.slot = ''
 }
 
+// Helper to get taken slots for the currently selected date
+const takenSlotsForSelectedDate = computed(() => {
+  if (!booking.date) return [];
+  const selectedDateStr = new Date(booking.date).toDateString();
+
+  return appointments.value
+    .filter(app => {
+      const appDate = app.date?.seconds
+        ? new Date(app.date.seconds * 1000)
+        : new Date(app.date);
+      return appDate.toDateString() === selectedDateStr;
+    })
+    .map(app => app.slot);
+});
+
 const availableSlots = computed(() => {
-  if (!booking.date) return []
-  const d = new Date(booking.date)
-  const day = d.getDay() // 0 = Sunday, 1 = Monday...
-  if (day === 1) return ['Closed on Mondays']
-  if (day >= 2 && day <= 5) return ['4:00pm-4:30pm']
-  if (booking.count === 1) return ['12:00pm-12:30pm', '2:00pm-2:30pm', '4:00pm-4:30pm']
-  if (booking.count === 2) return ['12:00pm-12:30pm', '3:00pm-3:30pm']
-  if (booking.count === 3) return ['1:00pm-2:00pm']
-  return []
-})
+  if (!booking.date) return [];
+  const d = new Date(booking.date);
+  if (d.getDay() === 1) return ['Closed on Mondays'];
+
+  const taken = takenSlotsForSelectedDate.value;
+  const totalBooked = getDailyTotal(booking.date);
+
+  // If 3 people are already booked (regardless of slot), no more slots available
+  if (totalBooked >= 3) return [];
+
+  // --- LOGIC FOR 1 PERSON ---
+  if (booking.count === 1) {
+    const options = ['12:00pm-2:00pm', '2:00pm-4:00pm', '4:00pm-6:00pm'];
+    return options.filter(slot => {
+      if (taken.includes(slot)) return false;
+
+      // If a 2-person slot is taken
+      if (taken.includes('12:00pm-3:00pm')) {
+        // Only 4-6pm is available
+        return slot === '4:00pm-6:00pm';
+      }
+      if (taken.includes('3:00pm-6:00pm')) {
+        // Only 12-2pm is available
+        return slot === '12:00pm-2:00pm';
+      }
+
+      // If a 1-person slot is already taken, others remain available (unless day hits 3)
+      return true;
+    });
+  }
+
+  // --- LOGIC FOR 2 PERSONS ---
+  if (booking.count === 2) {
+    const options = ['12:00pm-3:00pm', '3:00pm-6:00pm'];
+    return options.filter(slot => {
+      if (taken.includes(slot)) return false;
+
+      // If a 1-person slot is taken:
+      if (taken.includes('12:00pm-2:00pm')) {
+        return slot === '3:00pm-6:00pm'; // Only 3-6 available
+      }
+      if (taken.includes('4:00pm-6:00pm')) {
+        return slot === '12:00pm-3:00pm'; // Only 12-3 available
+      }
+      if (taken.includes('2:00pm-4:00pm')) {
+        return false; // Based on your rules, 2-4pm blocks 2-person slots
+      }
+
+      // If another 2-person slot is taken, day is full (handled by totalBooked check above)
+      return true;
+    });
+  }
+
+  // --- LOGIC FOR 3 PERSONS ---
+  if (booking.count === 3) {
+    // 3 persons only available if the day is completely empty
+    return totalBooked === 0 ? ['1:00pm-4:00pm'] : [];
+  }
+
+  return [];
+});
+
 
 // 1. Function to get total piercees for a specific date
 const getDailyTotal = (date: any) => {
@@ -476,17 +543,25 @@ const getDailyTotal = (date: any) => {
 // 2. Function for allowed-dates (Disabling)
 const isDateAvailable = (date: any) => {
   const d = new Date(date);
-  if (d.getDay() === 1) return false; // Monday check
-  return getDailyTotal(date) < 3;
+  if (d.getDay() === 1) return false;
+
+  const total = getDailyTotal(date);
+
+  // Disable if day is already full
+  if (total >= 3) return false;
+
+  // Specific check: if user wants to book 3 people, day must be 0
+  if (booking.count === 3 && total > 0) return false;
+
+  return true;
 };
 
 // 3. Function for event-color
-// 3. Function for event-color (Updated to include yellow for 2 bookings)
 const getEventColor = (date: any) => {
   const total = getDailyTotal(date);
-  if (total >= 3) return 'red';
-  if (total === 2) return 'orange'; // 'yellow' is often too light on white, 'orange' or 'amber' is more readable
-  return 'green'; // Default purple
+  if (total >= 3) return 'red';    // Full
+  if (total >= 1) return 'orange'; // Partial
+  return 'green';                 // Empty
 };
 
 const formReady = computed(() => {
