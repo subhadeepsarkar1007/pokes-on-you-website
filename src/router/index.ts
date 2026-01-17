@@ -23,24 +23,29 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  // 1. Always allow the Admin route to be accessed directly
+  // 1. Always allow the Admin route
   if (to.name === 'admin') {
     return next();
   }
 
-  // 2. Allow navigation if it's coming from the Navigation Drawer
+  // 2. Allow navigation from Navigation Drawer
   if (isMenuNavigation) {
-    isMenuNavigation = false; // Reset for next check
+    isMenuNavigation = false; 
     return next();
   }
 
-  // 3. Special case: If the user is at the root and tries to reload or enter Home
-  if (to.name === 'home' && from.name === undefined) {
+  // 3. NEW: Allow navigation from Guidelines specifically to Gallery
+  // This enables the "Jewellery designs gallery" link to work
+  if (from.name === 'guidelines' && to.name === 'gallery') {
     return next();
   }
 
-  // 4. BLOCK EVERYTHING ELSE (Back button, Forward button, Manual URL entry)
-  // next(false) keeps the user on the current page and resets the URL
+  // 4. Special case: Root/Reload access
+  if (to.name === 'home' && (from.name === undefined || from.name === null)) {
+    return next();
+  }
+
+  // 5. BLOCK EVERYTHING ELSE
   next(false);
 });
 

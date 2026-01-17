@@ -7,7 +7,7 @@
     </div>
 
     <v-container fluid class="gallery-container">
-      <div class="filter-wrapper d-flex flex-wrap justify-center mb-6">
+      <v-row class="filter-wrapper d-flex flex-wrap justify-center mb-6">
         <v-chip :class="['ma-1 filter-chip', !selectedFilter ? 'active-chip' : 'glass-chip']" elevation="0"
           @click="selectedFilter = null">
           #all
@@ -18,7 +18,7 @@
           @click="toggleFilter(tag)">
           #{{ tag }}
         </v-chip>
-      </div>
+      </v-row>
 
       <v-row dense>
         <v-col v-for="(img, index) in filteredImages" :key="img" cols="4" sm="4" md="4">
@@ -70,7 +70,7 @@ const modules = import.meta.glob('/src/assets/*.{png,jpg,jpeg,svg,gif,webp}', {
 }) as Record<string, () => Promise<{ default: string }>>
 
 const exclude = ['logo.jpg', 'icon.jpg']
-const filterTags = ['hiddenhelix', 'hanginghelix', 'traditionalnavel', 'floatingnavel']
+const filterTags = ['basic', 'hiddenhelix', 'hanginghelix', 'traditionalnavel', 'floatingnavel', 'conch', 'daith', 'rook', 'septum', 'tragus', 'lobe', 'upperlobe', 'traditionalhelix', 'verticalhelix', 'forwardhelix', 'labret', 'eyebrow', 'tongue', 'nipple',]
 
 interface GalleryImage {
   url: string
@@ -158,7 +158,10 @@ function open(index: number) {
 
 /* Filter Section */
 .filter-wrapper {
-  position: sticky;
+  position: relative;
+  height: auto;
+  width: auto;
+  object-fit: contain;
   top: 0;
   z-index: 10;
   padding: 10px 0;

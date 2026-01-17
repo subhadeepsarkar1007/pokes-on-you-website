@@ -142,10 +142,15 @@
           <div class="guideline-number">08</div>
           <div class="guideline-body">
             <h3>Jewelry</h3>
-            <p>Basic implant-grade jewelry is provided. Fancy jewelry from my jewellery designs gallery must be chosen
-              before
-              your appointment to allow for sterilization. Initial jewelry should not be removed for a minimum of 2
-              months.</p>
+            <p>
+              Basic implant-grade jewelry is provided. If you would like to select fancy jewelry for your
+              piercing, options are available to view in the
+              <router-link to="/gallery" class="gallery-inline-link">
+                <span>&#128279;</span> Jewellery designs gallery
+              </router-link>.
+              Please inform me of your choice before your appointment day to allow sufficient time for
+              sterilization. Initial jewelry should not be removed for a minimum of 2 months.
+            </p>
           </div>
         </div>
 
