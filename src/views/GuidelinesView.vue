@@ -211,12 +211,16 @@
 
 .secondary-bg-abs {
   background-color: #d8d9f7;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   position: fixed;
+  /* Keep it fixed */
   top: 0;
   left: 0;
   z-index: 0;
+  /* Add this to help GPU */
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .logo-wrapper {
@@ -242,11 +246,14 @@
 
 .glass-card {
   background: rgba(255, 255, 255, 0.5) !important;
-  backdrop-filter: blur(25px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(25px) saturate(190%) !important;
+  /* Higher opacity, less work for GPU */
   border-radius: 30px !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  z-index: 2;
+
+  /* Disable heavy blur on small screens */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .section-title {
