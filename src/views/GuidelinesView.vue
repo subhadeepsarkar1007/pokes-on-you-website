@@ -246,14 +246,11 @@
 
 .glass-card {
   background: rgba(255, 255, 255, 0.5) !important;
-  /* Higher opacity, less work for GPU */
   border-radius: 30px !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
   z-index: 2;
-
-  /* Disable heavy blur on small screens */
   backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important
 }
 
 .section-title {

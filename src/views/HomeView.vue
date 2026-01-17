@@ -36,14 +36,4 @@
   width: auto;
   object-fit: contain;
 }
-
-/* Glassmorphism looks great on #d8d9f7! */
-.glass-card {
-  background: rgba(255, 255, 255, 0.4);
-  /* Increased opacity slightly for better contrast */
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-}
 </style>
