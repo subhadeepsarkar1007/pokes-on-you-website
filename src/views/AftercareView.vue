@@ -8,65 +8,196 @@
 
     <v-container class="content-wrapper">
       <v-card class="glass-card pa-8 mb-10 animate-in">
-        <h2 class="section-title mb-6 text-center">General Tips for Piercing Care</h2>
-
-        <ul class="guideline-list mb-6">
-          <li>Clean your piercings 1-2 times a day with saline solution. Avoid over-cleaning.</li>
-          <li>Don't touch, twist, or play with your piercings. Follow LITHA (Leave It The Hell Alone).</li>
-          <li>Don't touch your piercings with dirty hands. Wash your hands prior to touching the piercing.</li>
-          <li>Keep your piercings dry. After cleaning/bathing, gently dry your piercings.</li>
-          <li>Do not sleep on your piercing or cause trauma such as hitting, snagging, pulling, or applying pressure.
-          </li>
-          <li>Pain, irritation, redness, swelling, itchiness, and lymph fluid are expected in the initial stages of
-            healing.</li>
-          <li>Apply a warm or cold compress (if required) for swollen or irritated piercings.</li>
-          <li>Do not change your jewelry for the first 2 months after getting pierced, until absolutely necessary, or as
-            advised by the piercer.</li>
-          <li>Sleep on a clean pillow or place a clean cloth over your pillow while sleeping.</li>
-          <li>Avoid applying ointments, betadine, or alcohol to your piercings.</li>
-          <li>Avoid harsh soap, shampoo, face wash, makeup, or any chemical products around your piercings for a few
-            days.</li>
-          <li>Avoid sour and spicy food for the first few days.</li>
-          <li>Avoid pools and beaches, any public water bodies for a month after getting pierced.</li>
-          <li>Keep your piercings at a safe distance from pets.</li>
-          <li>Keep a check for migration or rejection.</li>
-          <li>Contact your piercer or a doctor for serious complications.</li>
-        </ul>
-
-        <v-divider class="my-8 custom-divider"></v-divider>
+        <div class="d-flex">
+          <h2 class="section-title mb-6">**</h2>
+          <h2 class="section-title ml-4 mb-6">Appointment Policies</h2>
+        </div>
 
         <div class="policy-group mb-6">
-          <h3 class="group-header">Navel Piercing:</h3>
+          <h3 class="group-header">Booking Fee:</h3>
           <ul class="guideline-list">
-            <li>Avoid tight clothing or high-waisted pants that can rub against the piercing, cause trauma, or irritate
-              the site.</li>
-            <li>Avoid rigorous abdominal exercises for a few weeks.</li>
+            <li>
+              A booking fee of <strong>₹200 per person</strong> is required. This allows me to:
+              <ul>
+                <li>Prioritize serious clients: I can focus on those truly ready for their piercing.</li>
+                <li>Efficiently plan slots: This helps manage my schedule and dedicate sufficient time to each
+                  individual.</li>
+                <li>Begin necessary preparation: I can start the sterilization process well in advance.</li>
+              </ul>
+            </li>
+            <li>The booking fee will be adjusted against the final amount.</li>
+            <li>
+              This fee is <strong>non-refundable</strong> in the event of a no-show or if you cancel/reschedule less
+              than 12 hours before your
+              appointment. If I must cancel the appointment, you will receive a full refund.
+            </li>
+          </ul>
+        </div>
+
+        <div class="policy-group">
+          <h3 class="group-header">Appointment Duration:</h3>
+          <ul class="guideline-list">
+            <li>Each appointment is allotted <strong>2 hours</strong>.</li>
+            <li>Please try to arrive within the first 30 minutes of your scheduled time. Late arrivals may result in
+              extended waiting times or cancellation.</li>
+            <li>If you arrive beyond the allotted slot, your appointment may be cancelled and you will need to rebook.
+            </li>
           </ul>
         </div>
 
         <v-divider class="my-8 custom-divider"></v-divider>
 
-        <div class="policy-group mb-6">
-          <h3 class="group-header">Oral Piercing:</h3>
-          <ul class="guideline-list">
-            <li>Practice good oral hygiene.</li>
-            <li>Use mouthwash instead of brushing directly over the site.</li>
-            <li>Carry saline solution to rinse after every meal.</li>
-            <li>Avoid alcohol for a few weeks.</li>
-            <li>Avoid kissing and oral sex during the initial healing phase.</li>
-          </ul>
+        <div class="guideline-item">
+          <div class="guideline-number">01</div>
+          <div class="guideline-body">
+            <h3>Hygiene and Preparation</h3>
+            <p><strong>Thorough Cleaning:</strong> The area to be pierced must be thoroughly cleaned prior to arrival.
+              For ear piercings, wash your hair to remove oils and dirt. For oral piercings, maintain rigorous oral
+              hygiene.</p>
+            <p><strong>Avoidance of Irritants:</strong> Do not apply makeup to the area for facial piercings. Avoid
+              lotions, perfumes, or oils on or near the site, as these can cause irritation.</p>
+            <p><strong>Appropriate Attire:</strong> Wear comfortable clothing. For navel piercings, avoid high-waisted
+              garments that put pressure on the site.</p>
+            <p><strong>Grooming:</strong> Perform grooming (e.g., haircut, hair color, eyebrow plucking) at least 2 days
+              prior. Such practices should not be performed for roughly 2 months after the piercing.</p>
+          </div>
         </div>
 
         <v-divider class="my-8 custom-divider"></v-divider>
 
-        <div class="d-flex justify-center mb-6">
-          <v-btn variant="outlined" color="primary" href="https://safepiercing.org/aftercare/" target="_blank"
-            rounded="lg">
-            SafePiercing.org Aftercare
-          </v-btn>
+        <div class="guideline-item">
+          <div class="guideline-number">02</div>
+          <div class="guideline-body">
+            <h3>Health and Safety</h3>
+            <p><strong>Pre-Piercing Research:</strong> Research the specific piercing, procedure, healing process, and
+              potential complications such as migration, rejection, scarring, or keloids. Understand that a piercing is
+              an open wound.</p>
+            <p><strong>Health Disclosure:</strong> Inform me of any medical conditions, medications, or allergies
+              (latex/metal). Research your family history regarding keloids and discuss it with me.</p>
+            <p><strong>Pregnancy:</strong> Do not get pierced if you are pregnant. The immune system is often too weak
+              during pregnancy to effectively fight potential infections.</p>
+          </div>
+        </div>
+
+        <v-divider class="my-8 custom-divider"></v-divider>
+
+        <div class="guideline-item">
+          <div class="guideline-number">03</div>
+          <div class="guideline-body">
+            <h3>Anatomical Assessment</h3>
+            <p>Certain piercings require an anatomical assessment. Be prepared to provide photos if requested to
+              determine suitability.</p>
+          </div>
+        </div>
+
+        <v-divider class="my-8 custom-divider"></v-divider>
+
+        <div class="guideline-item">
+          <div class="guideline-number">04</div>
+          <div class="guideline-body">
+            <h3>Substance Restrictions</h3>
+            <p>Do not consume alcohol or drugs before your appointment, as they affect blood clotting. Do not consume
+              alcohol within 12 hours before or after your appointment. Do not come on an empty stomach; please eat a
+              meal beforehand.</p>
+          </div>
+        </div>
+
+        <v-divider class="my-8 custom-divider"></v-divider>
+
+        <div class="guideline-item">
+          <div class="guideline-number">05</div>
+          <div class="guideline-body">
+            <h3>Medical Intervention</h3>
+            <p>Severe complications like infections or keloids may require professional medical advice. Understand that
+              irritation bumps are part of the healing process, whereas keloids tend to be genetic.</p>
+          </div>
+        </div>
+
+        <v-divider class="my-8 custom-divider"></v-divider>
+
+        <div class="guideline-item">
+          <div class="guideline-number">06</div>
+          <div class="guideline-body">
+            <h3>Hygiene and Safety Protocols</h3>
+            <p>I adhere to strict hygiene and safety protocols. You are welcome to ask questions regarding my practices
+              or inspect my hygiene measures.</p>
+          </div>
+        </div>
+
+        <v-divider class="my-8 custom-divider"></v-divider>
+
+        <div class="guideline-item">
+          <div class="guideline-number">07</div>
+          <div class="guideline-body">
+            <h3>Piercing Limitations</h3>
+            <p>A maximum of 3 piercings will be performed in one sitting per person. For ear cartilage, only one ear
+              will be
+              pierced per sitting. Wait at least 2 months before piercing the other ear.</p>
+          </div>
+        </div>
+
+        <v-divider class="my-8 custom-divider"></v-divider>
+
+        <div class="guideline-item">
+          <div class="guideline-number">08</div>
+          <div class="guideline-body">
+            <h3>Jewelry</h3>
+            <p>
+              Basic implant-grade jewelry is provided. If you would like to select fancy jewelry for your
+              piercing, options are available to view in the
+              <router-link to="/gallery" class="gallery-inline-link">
+                <span>&#128279;</span> Jewellery designs gallery
+              </router-link>.
+              Please inform me of your choice before your appointment day to allow sufficient time for
+              sterilization. Initial jewelry should not be removed for a minimum of 2 months.
+            </p>
+          </div>
+        </div>
+
+        <v-divider class="my-8 custom-divider"></v-divider>
+
+        <div class="guideline-item">
+          <div class="guideline-number">09</div>
+          <div class="guideline-body">
+            <h3>Aftercare Commitment</h3>
+            <p>Proper aftercare is your sole responsibility. Understand that jewelry acts as a foreign body and a medium
+              for contaminants. Healing takes time.</p>
+          </div>
+        </div>
+
+        <v-divider class="my-8 custom-divider"></v-divider>
+
+        <div class="guideline-item">
+          <div class="guideline-number">10</div>
+          <div class="guideline-body">
+            <h3>Gallery Contribution</h3>
+            <p>You are expected to provide clear, self-taken photos of your healing piercing for my gallery.</p>
+          </div>
+        </div>
+
+        <v-divider class="my-8 custom-divider"></v-divider>
+
+        <div class="guideline-item">
+          <div class="guideline-number">11</div>
+          <div class="guideline-body">
+            <h3>Travel and Lifestyle</h3>
+            <p>Plan your appointment only if you have no travel plans and do not intend to visit pools or beaches within
+              the next
+              month. Travel can introduce additional bacteria and make consistent aftercare difficult.</p>
+          </div>
+        </div>
+
+        <v-divider class="my-8 custom-divider"></v-divider>
+
+        <div class="guideline-item">
+          <div class="guideline-number">12</div>
+          <div class="guideline-body">
+            <h3>Piercer Fallibility</h3>
+            <p>Piercers are human and capable of making mistakes. If a piercing is placed incorrectly or at a suboptimal
+              angle, I will assess the situation and may offer to re-pierce the area to correct the error.</p>
+          </div>
         </div>
       </v-card>
-
     </v-container>
   </div>
 </template>
@@ -135,16 +266,48 @@
   padding-left: 20px;
   color: #444;
   margin-bottom: 16px;
-  list-style-type: disc;
 }
 
 .guideline-list li {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   line-height: 1.6;
+}
+
+.guideline-list ul {
+  padding-left: 20px;
+  margin-top: 8px;
+  list-style-type: circle;
 }
 
 .custom-divider {
   border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.guideline-item {
+  display: flex;
+  gap: 25px;
+  align-items: flex-start;
+}
+
+.guideline-number {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #222;
+  line-height: 1;
+  min-width: 50px;
+}
+
+.guideline-body h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #222;
+}
+
+.guideline-body p {
+  line-height: 1.6;
+  color: #444;
+  margin-bottom: 14px;
 }
 
 .animate-in {
