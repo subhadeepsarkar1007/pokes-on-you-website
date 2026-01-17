@@ -464,66 +464,61 @@ const takenSlotsForSelectedDate = computed(() => {
 const availableSlots = computed(() => {
   if (!booking.date) return [];
   const d = new Date(booking.date);
-  if (d.getDay() === 1) return ['Closed on Mondays'];
+  const dayOfWeek = d.getDay(); // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat
+
+  if (dayOfWeek === 1) return ['Closed on Mondays'];
 
   const taken = takenSlotsForSelectedDate.value;
   const totalBooked = getDailyTotal(booking.date);
 
-  // If 3 people are already booked (regardless of slot), no more slots available
+  // Define the restricted days: Tue, Wed, Thu, Fri
+  const isRestrictedWeekday = [2, 3, 4, 5].includes(dayOfWeek);
+
   if (totalBooked >= 3) return [];
 
   // --- LOGIC FOR 1 PERSON ---
   if (booking.count === 1) {
-    const options = ['12:00pm-2:00pm', '2:00pm-4:00pm', '4:00pm-6:00pm'];
+    let options = ['12:00pm-2:00pm', '2:00pm-4:00pm', '4:00pm-6:00pm'];
+
+    // On restricted weekdays, ONLY 4-6pm is allowed
+    if (isRestrictedWeekday) {
+      options = ['4:00pm-6:00pm'];
+    }
+
     return options.filter(slot => {
       if (taken.includes(slot)) return false;
-
-      // If a 2-person slot is taken
-      if (taken.includes('12:00pm-3:00pm')) {
-        // Only 4-6pm is available
-        return slot === '4:00pm-6:00pm';
-      }
-      if (taken.includes('3:00pm-6:00pm')) {
-        // Only 12-2pm is available
-        return slot === '12:00pm-2:00pm';
-      }
-
-      // If a 1-person slot is already taken, others remain available (unless day hits 3)
+      if (taken.includes('12:00pm-3:00pm')) return slot === '4:00pm-6:00pm';
+      if (taken.includes('3:00pm-6:00pm')) return slot === '12:00pm-2:00pm';
       return true;
     });
   }
 
   // --- LOGIC FOR 2 PERSONS ---
   if (booking.count === 2) {
+    // Block 2 person bookings on restricted weekdays
+    if (isRestrictedWeekday) return [];
+
     const options = ['12:00pm-3:00pm', '3:00pm-6:00pm'];
     return options.filter(slot => {
       if (taken.includes(slot)) return false;
-
-      // If a 1-person slot is taken:
-      if (taken.includes('12:00pm-2:00pm')) {
-        return slot === '3:00pm-6:00pm'; // Only 3-6 available
-      }
-      if (taken.includes('4:00pm-6:00pm')) {
-        return slot === '12:00pm-3:00pm'; // Only 12-3 available
-      }
-      if (taken.includes('2:00pm-4:00pm')) {
-        return false; // Based on your rules, 2-4pm blocks 2-person slots
-      }
-
-      // If another 2-person slot is taken, day is full (handled by totalBooked check above)
+      const has12to2 = taken.includes('12:00pm-2:00pm');
+      const has4to6 = taken.includes('4:00pm-6:00pm');
+      if (has12to2 && has4to6) return false;
+      if (has12to2 && slot === '12:00pm-3:00pm') return false;
+      if (has4to6 && slot === '3:00pm-6:00pm') return false;
       return true;
     });
   }
 
   // --- LOGIC FOR 3 PERSONS ---
   if (booking.count === 3) {
-    // 3 persons only available if the day is completely empty
+    // Block 3 person bookings on restricted weekdays
+    if (isRestrictedWeekday) return [];
     return totalBooked === 0 ? ['1:00pm-4:00pm'] : [];
   }
 
   return [];
 });
-
 
 // 1. Function to get total piercees for a specific date
 const getDailyTotal = (date: any) => {
@@ -543,15 +538,33 @@ const getDailyTotal = (date: any) => {
 // 2. Function for allowed-dates (Disabling)
 const isDateAvailable = (date: any) => {
   const d = new Date(date);
-  if (d.getDay() === 1) return false;
+  const dayOfWeek = d.getDay();
+  if (dayOfWeek === 1) return false; // Monday
+
+  const isRestrictedWeekday = [2, 3, 4, 5].includes(dayOfWeek);
+
+  // If user selected 2 or 3 people, disable Tue-Fri entirely
+  if (booking.count > 1 && isRestrictedWeekday) {
+    return false;
+  }
 
   const total = getDailyTotal(date);
+  const taken = appointments.value
+    .filter(app => {
+      const appDate = app.date?.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date);
+      return appDate.toDateString() === d.toDateString();
+    })
+    .map(app => app.slot);
 
-  // Disable if day is already full
   if (total >= 3) return false;
 
-  // Specific check: if user wants to book 3 people, day must be 0
-  if (booking.count === 3 && total > 0) return false;
+  if (booking.count === 3) return total === 0;
+
+  if (booking.count === 2) {
+    if (taken.includes('2:00pm-4:00pm')) return false;
+    if (taken.includes('12:00pm-2:00pm') && taken.includes('4:00pm-6:00pm')) return false;
+    return total <= 1;
+  }
 
   return true;
 };
