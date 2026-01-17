@@ -156,21 +156,150 @@
     </v-container>
 
     <v-dialog v-model="termsDialog" max-width="500" persistent>
-      <v-card class="custom-glass-card pa-6">
-        <h3 class="text-center mb-4 menu-title">Studio Policies</h3>
+      <v-card class="glass-card pa-6">
+        <h3 class="text-center mb-4 menu-title">Guidlines & Policies</h3>
         <v-divider class="mb-4"></v-divider>
 
         <div class="terms-content">
           <ul class="policy-list">
-            <li>I agree to provide 24-hour notice for cancellations.</li>
-            <li>I understand the No-Show policy regarding appointment slots.</li>
-            <li>I agree to follow all pre-piercing health guidelines.</li>
-            <li>I will bring a valid Photo ID for age verification.</li>
+            <li>
+              A booking fee of <strong>₹200 per person</strong> is required. This allows me to:
+              <ul class="pl-3">
+                <li>Prioritize serious clients: I can focus on those truly ready for their piercing.</li>
+                <li>Efficiently plan slots: This helps manage my schedule and dedicate sufficient time to each
+                  individual.</li>
+                <li>Begin necessary preparation: I can start the sterilization process well in advance.</li>
+              </ul>
+            </li>
+            <li>The booking fee will be adjusted against the final amount.</li>
+            <li>
+              This fee is <strong>non-refundable</strong> in the event of a no-show or if you cancel/reschedule less
+              than 12 hours before your
+              appointment. If I must cancel the appointment, you will receive a full refund.
+            </li>
+            <li>Each appointment is allotted <strong>2 hours</strong>.</li>
+            <li>Please try to arrive within the first 30 minutes of your scheduled time. Late arrivals may result in
+              extended waiting times or cancellation.</li>
+            <li>If you arrive beyond the allotted slot, your appointment may be cancelled and you will need to rebook.
+            </li>
+            <li>Hygiene and Preparation
+              <ul class="pl-3">
+                <li><strong>Thorough Cleaning:</strong> The area to be pierced must be thoroughly cleaned prior to
+                  arrival.
+                  For ear piercings, wash your hair to remove oils and dirt. For oral piercings, maintain rigorous oral
+                  hygiene.</li>
+                <li><strong>Avoidance of Irritants:</strong> Do not apply makeup to the area for facial piercings. Avoid
+                  lotions, perfumes, or oils on or near the site, as these can cause irritation.</li>
+                <li><strong>Appropriate Attire:</strong> Wear comfortable clothing. For navel piercings, avoid
+                  high-waisted
+                  garments that put pressure on the site.</li>
+                <li><strong>Grooming:</strong> Perform grooming (e.g., haircut, hair color, eyebrow plucking) at least 2
+                  days
+                  prior. Such practices should not be performed for roughly 2 months after the piercing.</li>
+              </ul>
+            </li>
+            <li> Health and Safety
+              <ul class="pl-3">
+                <li><strong>Pre-Piercing Research:</strong> Research the specific piercing, procedure, healing process,
+                  and
+                  potential complications such as migration, rejection, scarring, or keloids. Understand that a piercing
+                  is
+                  an open wound.</li>
+                <li><strong>Health Disclosure:</strong> Inform me of any medical conditions, medications, or allergies
+                  (latex/metal). Research your family history regarding keloids and discuss it with me.</li>
+                <li><strong>Pregnancy:</strong> Do not get pierced if you are pregnant. The immune system is often too
+                  weak
+                  during pregnancy to effectively fight potential infections.</li>
+              </ul>
+            </li>
+            <li> Anatomical Assessment
+              <ul class="pl-3">
+                <li>Certain piercings require an anatomical assessment. Be prepared to provide photos if requested to
+                  determine suitability.</li>
+                <li>Not all piercings are suitable for every individual. I reserve the right to refuse any piercing if
+                  I believe it is unsafe or unsuitable.</li>
+              </ul>
+            </li>
+            <li> Substance Restrictions
+              <ul class="pl-3">
+                <li>Do not consume alcohol or drugs before your appointment, as they affect blood clotting. Do not
+                  consume
+                  alcohol within 12 hours before or after your appointment. Do not come on an empty stomach; please eat
+                  a
+                  meal beforehand.</li>
+              </ul>
+            </li>
+            <li> Medical Intervention
+              <ul class="pl-3">
+                <li>Severe complications like infections or keloids may require professional medical advice. Understand
+                  that
+                  irritation bumps are part of the healing process, whereas keloids tend to be genetic.</li>
+
+              </ul>
+            </li>
+            <li> Hygiene and Safety Protocols
+              <ul class="pl-3">
+                <li>I adhere to strict hygiene and safety protocols. You are welcome to ask questions regarding my
+                  practices
+                  or inspect my hygiene measures.</li>
+
+              </ul>
+            </li>
+            <li> Piercing Limitations
+              <ul class="pl-3">
+                <li>A maximum of 3 piercings will be performed in one sitting per person. For ear cartilage, only one
+                  ear
+                  will be
+                  pierced per sitting. Wait at least 2 months before piercing the other ear.</li>
+
+              </ul>
+            </li>
+            <li> Jewelry
+              <ul class="pl-3">
+                <li>Basic implant-grade jewelry is provided. If you would like to select fancy jewelry for your
+                  piercing, options are available to view in the
+                  Jewellery designs gallery
+                  Please inform me of your choice before your appointment day to allow sufficient time for
+                  sterilization. Initial jewelry should not be removed for a minimum of 2 months.</li>
+
+              </ul>
+            </li>
+            <li> Aftercare Commitment
+              <ul class="pl-3">
+                <li>Proper aftercare is your sole responsibility. Understand that jewelry acts as a foreign body and a
+                  medium for contaminants. Healing takes time.</li>
+
+              </ul>
+            </li>
+            <li> Gallery Contribution
+              <ul class="pl-3">
+                <li>You are expected to provide clear, self-taken photos of your healing piercing for my gallery.</li>
+
+              </ul>
+            </li>
+            <li> Travel and Lifestyle
+              <ul class="pl-3">
+                <li>Plan your appointment only if you have no travel plans and do not intend to visit pools or beaches
+                  within
+                  the next
+                  month. Travel can introduce additional bacteria and make consistent aftercare difficult.</li>
+
+              </ul>
+            </li>
+            <li> Piercer Fallibility
+              <ul class="pl-3">
+                <li>Piercers are human and capable of making mistakes. If a piercing is placed incorrectly or at a
+                  suboptimal
+                  angle, I will assess the situation and may offer to re-pierce the area to correct the error.</li>
+
+              </ul>
+            </li>
+
+
           </ul>
         </div>
 
         <div v-if="showTermsError" class="error-alert-box mt-4 pa-3 text-center">
-          <v-icon color="red" size="small" class="mr-2">mdi-alert-circle</v-icon>
           Please click <strong>"I Accept"</strong> to proceed.
         </div>
 
@@ -585,5 +714,14 @@ onMounted(() => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 30px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  z-index: 2;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important
 }
 </style>

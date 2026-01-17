@@ -41,7 +41,6 @@
                 <div class="expanded-detail-box">
                   <div v-for="(p, idx) in item.piercees" :key="idx" class="person-card mb-3">
                     <div class="d-flex align-center mb-1">
-                      <v-icon size="16" class="mr-2" color="primary">mdi-account-outline</v-icon>
                       <strong>{{ p.name }}</strong>
                     </div>
                     <div class="text-caption pl-6 text-grey-darken-2">
@@ -53,14 +52,14 @@
 
                   <div class="d-flex flex-column gap-2">
                     <div class="text-caption d-flex align-center mb-1">
-                      <v-icon size="14" class="mr-2">mdi-phone</v-icon> {{ item.phone }}
+                      {{ item.phone }}
                     </div>
                     <div class="text-caption d-flex align-center">
-                      <v-icon size="14" class="mr-2">mdi-email</v-icon> {{ item.email }}
+                      {{ item.email }}
                     </div>
                     <v-btn color="red-lighten-4" class="text-red-darken-4 mt-4" flat block size="small"
                       @click="confirmDelete(item.id)">
-                      <v-icon start icon="mdi-delete" size="16"></v-icon>
+
                       Delete Appointment
                     </v-btn>
                   </div>

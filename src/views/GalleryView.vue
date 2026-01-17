@@ -35,7 +35,6 @@
 
       <v-row v-if="filteredImages.length === 0" justify="center" class="mt-10 animate-in">
         <v-col cols="12" class="text-center">
-          <v-icon color="#7b62a3" size="48">mdi-image-search-outline</v-icon>
           <p class="text-subtitle-1 mt-2" style="color: #444; font-weight: 500;">
             No images found for #{{ selectedFilter }}
           </p>
