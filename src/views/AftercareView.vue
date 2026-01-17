@@ -29,7 +29,7 @@
           <li>Avoid sour and spicy food for the first few days.</li>
           <li>Avoid pools and beaches, any public water bodies for a month after getting pierced.</li>
           <li>Keep your piercings at a safe distance from pets.</li>
-          <li>Keep a check for migration or rejection.</li>
+          <li>Monitor for migration or rejection.</li>
           <li>Contact your piercer or a doctor for serious complications.</li>
         </ul>
 

@@ -157,7 +157,7 @@
 
     <v-dialog v-model="termsDialog" max-width="500" persistent>
       <v-card class="glass-card pa-6">
-        <h3 class="text-center mb-4 menu-title">Guidlines & Policies</h3>
+        <h3 class="text-center mb-4 menu-title">Guidelines & Policies</h3>
         <v-divider class="mb-4"></v-divider>
 
         <div class="terms-content">
@@ -186,7 +186,9 @@
               <ul class="pl-3">
                 <li><strong>Thorough Cleaning:</strong> The area to be pierced must be thoroughly cleaned prior to
                   arrival.
-                  For ear piercings, wash your hair to remove oils and dirt. For oral piercings, maintain rigorous oral
+                  For ear piercings, please wash your hair to remove oils and dirt. For oral piercings, maintain
+                  rigorous
+                  oral
                   hygiene.</li>
                 <li><strong>Avoidance of Irritants:</strong> Do not apply makeup to the area for facial piercings. Avoid
                   lotions, perfumes, or oils on or near the site, as these can cause irritation.</li>
@@ -260,7 +262,7 @@
                   piercing, options are available to view in the
                   Jewellery designs gallery
                   Please inform me of your choice before your appointment day to allow sufficient time for
-                  sterilization. Initial jewelry should not be removed for a minimum of 2 months.</li>
+                  sterilization. Initial jewelry must not be removed for a minimum of 2 months.</li>
 
               </ul>
             </li>
