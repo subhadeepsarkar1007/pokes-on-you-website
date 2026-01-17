@@ -419,7 +419,7 @@ onMounted(() => {
 }
 
 .custom-glass-card {
-  background: rgba(255, 255, 255, 0.82) !important;
+  background: rgba(255, 255, 255, 0.6) !important;
   backdrop-filter: blur(25px) saturate(190%) !important;
   -webkit-backdrop-filter: blur(25px) saturate(190%) !important;
   border-radius: 30px !important;
