@@ -82,7 +82,8 @@
                     variant="solo" class="custom-input" flat :rules="rules.required" />
                 </template>
                 <v-date-picker v-model="booking.date" @update:model-value="onDateSelected" :min="todayDate"
-                  :max="maxDate" :allowed-dates="isNotMonday" color="#8b76a2"></v-date-picker>
+                  :max="maxDate" :allowed-dates="isDateAvailable" :events="(date) => getDailyTotal(date) > 0"
+                  :event-color="getEventColor" color="#8b76a2"></v-date-picker>
               </v-menu>
             </v-col>
 
@@ -457,7 +458,36 @@ const availableSlots = computed(() => {
   return []
 })
 
-const isNotMonday = (date: any) => new Date(date).getDay() !== 1
+// 1. Function to get total piercees for a specific date
+const getDailyTotal = (date: any) => {
+  const dateString = new Date(date).toDateString();
+  return appointments.value.reduce((sum, app) => {
+    if (!app.date) return sum;
+    const appDate = app.date.seconds
+      ? new Date(app.date.seconds * 1000)
+      : new Date(app.date);
+
+    return appDate.toDateString() === dateString
+      ? sum + (Number(app.count) || 0)
+      : sum;
+  }, 0);
+};
+
+// 2. Function for allowed-dates (Disabling)
+const isDateAvailable = (date: any) => {
+  const d = new Date(date);
+  if (d.getDay() === 1) return false; // Monday check
+  return getDailyTotal(date) < 3;
+};
+
+// 3. Function for event-color
+// 3. Function for event-color (Updated to include yellow for 2 bookings)
+const getEventColor = (date: any) => {
+  const total = getDailyTotal(date);
+  if (total >= 3) return 'red';
+  if (total === 2) return 'orange'; // 'yellow' is often too light on white, 'orange' or 'amber' is more readable
+  return 'green'; // Default purple
+};
 
 const formReady = computed(() => {
   const slotValid = booking.slot && !booking.slot.includes('Closed')
@@ -474,8 +504,6 @@ const closeTerms = () => {
   termsDialog.value = false
   showTermsError.value = false
 }
-
-
 
 const submitForm = async () => {
   const { valid: isFormValid } = await formRef.value.validate()
@@ -503,8 +531,21 @@ const submitForm = async () => {
 
 onMounted(() => {
   const q = query(collection(db, "appointments"), orderBy("createdAt", "desc"));
+
   onSnapshot(q, (snapshot) => {
     appointments.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    const summary = appointments.value.reduce((acc: any, app) => {
+      const d = app.date?.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date);
+      const key = d.toDateString();
+      acc[key] = (acc[key] || 0) + (Number(app.count) || 0);
+      return acc;
+    }, {});
+
+    console.log("--- LIVE BOOKING TALLY ---");
+    Object.entries(summary).forEach(([date, count]) => {
+      console.log(`${date}: ${count} piercee(s) ${count >= 3 ? '[FULL - RED]' : '[AVAILABLE]'}`);
+    });
   });
 })
 
