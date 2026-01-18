@@ -485,12 +485,12 @@ const availableSlots = computed(() => {
   if (isWeekend) {
     // 3 PERSONS: Only if day is completely empty
     if (booking.count === 3) {
-      return (totalBooked === 0) ? ['1:00pm-4:00pm'] : [];
+      return (totalBooked === 0) ? ['1:00pm-5:00pm'] : [];
     }
 
     // 2 PERSONS
     if (booking.count === 2) {
-      if (taken.includes('1:00pm-4:00pm') || taken.includes('2:00pm-4:00pm')) return [];
+      if (taken.includes('1:00pm-5:00pm') || taken.includes('2:00pm-4:00pm')) return [];
 
       let options = ['12:00pm-3:00pm', '3:00pm-6:00pm'];
       return options.filter(slot => {
@@ -508,7 +508,7 @@ const availableSlots = computed(() => {
 
     // 1 PERSON
     if (booking.count === 1) {
-      if (taken.includes('1:00pm-4:00pm') || totalBooked >= 3) return [];
+      if (taken.includes('1:00pm-5:00pm') || totalBooked >= 3) return [];
 
       let options = ['12:00pm-2:00pm', '2:00pm-4:00pm', '4:00pm-6:00pm'];
       return options.filter(slot => {
@@ -570,7 +570,7 @@ const isDateAvailable = (date: any) => {
 
   // Weekend Logic
   if (booking.count === 3) return totalPiercees === 0;
-  if (takenSlots.includes('1:00pm-4:00pm')) return false;
+  if (takenSlots.includes('1:00pm-5:00pm')) return false;
 
   return true;
 };
@@ -586,7 +586,7 @@ const getEventColor = (date: any) => {
   });
 
   const total = dayApps.reduce((sum, a) => sum + (Number(a.count) || 0), 0);
-  const hasThreePersonBlock = dayApps.some(a => a.slot === '1:00pm-4:00pm');
+  const hasThreePersonBlock = dayApps.some(a => a.slot === '1:00pm-5:00pm');
 
   // RED if: 3-person slot taken, OR 3+ people booked (except the 2+2 weekend case)
   if (hasThreePersonBlock || total >= 3) {
@@ -596,8 +596,8 @@ const getEventColor = (date: any) => {
     return 'red';
   }
 
-  if (total > 2) return 'orange';
-  if (total > 0) return 'green';
+  if (total >= 2) return 'orange';
+  if (total > 0 && total < 2) return 'green';
 };
 
 const formReady = computed(() => {
