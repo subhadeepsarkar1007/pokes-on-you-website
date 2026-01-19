@@ -83,7 +83,7 @@
                 </template>
                 <v-date-picker v-model="booking.date" @update:model-value="onDateSelected" :min="todayDate"
                   :max="maxDate" :allowed-dates="isDateAvailable" :events="(date) => getDailyTotal(date) > 0"
-                  :event-color="getEventColor" color="#8b76a2"></v-date-picker>
+                  :event-color="getEventColor" color="#8b76a2" hide-title></v-date-picker>
               </v-menu>
             </v-col>
 
@@ -483,7 +483,7 @@ const availableSlots = computed(() => {
 
   // --- SAT & SUN LOGIC ---
   if (isWeekend) {
-    // 3 PERSONS: Only if day is completely empty
+    // 3 PERSONS: 1:00pm-5:00pm only if day is totally empty
     if (booking.count === 3) {
       return (totalBooked === 0) ? ['1:00pm-5:00pm'] : [];
     }
@@ -496,10 +496,11 @@ const availableSlots = computed(() => {
       return options.filter(slot => {
         if (taken.includes(slot)) return false;
         if (slot === '12:00pm-3:00pm') {
-          // Available if nothing is taken OR if only the other 2-person/single slot at the end is taken
+          // Available if nothing blocks the 12-3pm range
           return !taken.includes('12:00pm-2:00pm') && !taken.includes('2:00pm-4:00pm');
         }
         if (slot === '3:00pm-6:00pm') {
+          // Available if nothing blocks the 3-6pm range
           return !taken.includes('4:00pm-6:00pm') && !taken.includes('2:00pm-4:00pm');
         }
         return true;
@@ -513,9 +514,11 @@ const availableSlots = computed(() => {
       let options = ['12:00pm-2:00pm', '2:00pm-4:00pm', '4:00pm-6:00pm'];
       return options.filter(slot => {
         if (taken.includes(slot)) return false;
-        // Block based on 2-person bookings
+
+        // Blocking based on 2-person (3hr) slots
         if (taken.includes('12:00pm-3:00pm') && slot !== '4:00pm-6:00pm') return false;
         if (taken.includes('3:00pm-6:00pm') && slot !== '12:00pm-2:00pm') return false;
+
         return true;
       });
     }
@@ -538,39 +541,44 @@ const getDailyTotal = (date: any) => {
   }, 0);
 };
 
-// 2. Function for allowed-dates (Disabling)
 const isDateAvailable = (date: any) => {
   const d = new Date(date);
   const dayOfWeek = d.getDay();
-  if (dayOfWeek === 1) return false;
+  if (dayOfWeek === 1) return false; // Monday check
 
   const dateString = d.toDateString();
-  const dayAppointments = appointments.value.filter(app => {
+  const dayApps = appointments.value.filter(app => {
     const appDate = app.date?.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date);
     return appDate.toDateString() === dateString;
   });
 
-  const takenSlots = dayAppointments.map(a => a.slot);
-  const totalPiercees = dayAppointments.reduce((sum, a) => sum + (Number(a.count) || 0), 0);
+  const takenSlots = dayApps.map(a => a.slot);
+  const totalPiercees = dayApps.reduce((sum, a) => sum + (Number(a.count) || 0), 0);
+  const isWeekend = [0, 6].includes(dayOfWeek);
 
-  // RULE: If 3 or more piercees total, disable date (unless it's the specific 2+2 person weekend exception)
+  // --- RULE: ALWAYS DISABLE IF 3+ PIERCEES (Unless weekend 2+2 exception) ---
   if (totalPiercees >= 3) {
-    // Exception: Allow a second 2-person booking if one already exists on weekend
-    const isWeekend = [0, 6].includes(dayOfWeek);
     if (isWeekend && booking.count === 2 && totalPiercees === 2) {
-      if (takenSlots.includes('12:00pm-3:00pm') || takenSlots.includes('3:00pm-6:00pm')) return true;
+      // If one 2-person slot is taken, the other might be free
+      const hasOneTwoPersonSlot = takenSlots.includes('12:00pm-3:00pm') || takenSlots.includes('3:00pm-6:00pm');
+      if (hasOneTwoPersonSlot && !takenSlots.includes('2:00pm-4:00pm')) return true;
     }
     return false;
   }
 
-  const isRestrictedWeekday = [2, 3, 4, 5].includes(dayOfWeek);
-  if (isRestrictedWeekday) {
+  // --- TUE-FRI: Only 1 person, 1 slot ---
+  if ([2, 3, 4, 5].includes(dayOfWeek)) {
     return booking.count === 1 && totalPiercees === 0;
   }
 
-  // Weekend Logic
-  if (booking.count === 3) return totalPiercees === 0;
-  if (takenSlots.includes('1:00pm-5:00pm')) return false;
+  // --- WEEKEND CAPACITY CHECK ---
+  if (isWeekend) {
+    if (booking.count === 3) return totalPiercees === 0;
+    if (takenSlots.includes('1:00pm-5:00pm')) return false;
+
+    // If middle slot (2-4pm) is taken, no multi-person slots are possible
+    if (takenSlots.includes('2:00pm-4:00pm') && booking.count > 1) return false;
+  }
 
   return true;
 };
@@ -578,26 +586,23 @@ const isDateAvailable = (date: any) => {
 // 3. Function for event-color
 const getEventColor = (date: any) => {
   const d = new Date(date);
-  const dateString = d.toDateString();
-
   const dayApps = appointments.value.filter(app => {
     const appDate = app.date?.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date);
-    return appDate.toDateString() === dateString;
+    return appDate.toDateString() === d.toDateString();
   });
 
   const total = dayApps.reduce((sum, a) => sum + (Number(a.count) || 0), 0);
-  const hasThreePersonBlock = dayApps.some(a => a.slot === '1:00pm-5:00pm');
+  const hasThreePersonSlot = dayApps.some(a => a.slot === '1:00pm-5:00pm');
 
-  // RED if: 3-person slot taken, OR 3+ people booked (except the 2+2 weekend case)
-  if (hasThreePersonBlock || total >= 3) {
-    // Special check: If it's a weekend and exactly two 2-person slots are booked, it's RED (Full)
-    // If only one 2-person slot is booked (total 2), it's ORANGE because another 2-person can join.
-    if (total === 2 && dayApps.some(a => a.count === 2)) return 'orange';
-    return 'red';
-  }
+  // RED if completely full (3 people or the 3-person specific block)
+  // Note: 2+2 weekend scenario is also "Full"
+  if (hasThreePersonSlot || total >= 3 || (total === 4)) return 'red';
 
-  if (total >= 2) return 'orange';
-  if (total > 0 && total < 2) return 'green';
+  // ORANGE if partially booked
+  if (total > 1) return 'orange';
+
+  // GREEN if empty
+  if (total == 1) return 'green';
 };
 
 const formReady = computed(() => {
