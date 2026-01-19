@@ -69,7 +69,7 @@ const modules = import.meta.glob('/src/assets/*.{png,jpg,jpeg,svg,gif,webp}', {
 }) as Record<string, () => Promise<{ default: string }>>
 
 const exclude = ['logo.jpg', 'icon.jpg']
-const filterTags = ['basic', 'hiddenhelix', 'hanginghelix', 'traditionalnavel', 'floatingnavel', 'conch', 'daith', 'rook', 'septum', 'tragus', 'lobe', 'upperlobe', 'traditionalhelix', 'verticalhelix', 'forwardhelix', 'labret', 'eyebrow', 'tongue', 'nipple',]
+const filterTags = ['basic', 'hiddenhelix', 'hanginghelix', 'traditionalnavel', 'floatingnavel', 'conch', 'daith', 'rook', 'septum', 'tragus', 'lobe', 'upperlobe', 'traditionalhelix', 'verticalhelix', 'forwardhelix', 'labret', 'eyebrow', 'tongue', 'nipple', "flat"]
 
 interface GalleryImage {
   url: string
