@@ -791,6 +791,7 @@ onMounted(() => {
 .submit-btn {
   background: #8b76a2 !important;
   color: white !important;
+  border-radius: 15px !important;
 }
 
 .terms-btn {

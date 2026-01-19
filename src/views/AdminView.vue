@@ -89,7 +89,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { db } from '../firebase'
-import { collection, query, orderBy, onSnapshot, doc, deleteDoc } from 'firebase/firestore'
+import { collection, query, orderBy, onSnapshot, doc, deleteDoc, writeBatch, Timestamp } from 'firebase/firestore'
 
 const appointments = ref<any[]>([])
 const expandedRows = ref([]) // Necessary to track expansion state
@@ -100,10 +100,50 @@ const headers = [
   { title: 'Appointments', key: 'data-table-expand' },
 ]
 
+const cleanupPastAppointments = async () => {
+  // Get today's date at the very start of the day (00:00:00)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Filter local appointments that have already loaded
+  // or run a specific query to find old ones
+  const pastAppointments = appointments.value.filter(app => {
+    const appDate = app.date.toDate ? app.date.toDate() : new Date(app.date);
+    return appDate < today;
+  });
+
+  if (pastAppointments.length === 0) return;
+
+  // Use a Batch to delete multiple documents at once for efficiency
+  const batch = writeBatch(db);
+  pastAppointments.forEach((app) => {
+    const docRef = doc(db, "appointments", app.id);
+    batch.delete(docRef);
+  });
+
+  try {
+    await batch.commit();
+    console.log(`${pastAppointments.length} old appointments cleared.`);
+  } catch (e) {
+    console.error("Error cleaning up old appointments:", e);
+  }
+};
+
+// Update your onMounted to run the cleanup
 onMounted(() => {
-  const q = query(collection(db, "appointments"), orderBy("createdAt", "desc"));
+  const q = query(
+    collection(db, "appointments"),
+    orderBy("date", "asc")
+  );
+
   onSnapshot(q, (snapshot) => {
-    appointments.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    appointments.value = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    // Optional: Run cleanup automatically after data loads
+    cleanupPastAppointments();
   });
 })
 
