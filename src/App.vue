@@ -8,18 +8,23 @@
           <span></span>
         </span>
       </v-btn>
+      <v-spacer></v-spacer>
+      <div class="mr-4">
+        <language-toggle v-model="locale" @update:model-value="onLanguageChange" />
+      </div>
     </v-app-bar>
 
     <v-navigation-drawer v-model="drawer" temporary location="top" class="custom-drawer" elevation="0">
       <v-list nav class="drawer-list">
-        <v-list-item to="/" @click="handleNavClick" title="Home" class="menu-item" active-class="active-item" />
-        <v-list-item to="/schedule" @click="handleNavClick" title="Schedule Appointment" class="menu-item"
+        <v-list-item to="/" @click="handleNavClick" :title="$t('nav.home')" class="menu-item"
           active-class="active-item" />
-        <v-list-item to="/gallery" @click="handleNavClick" title="Jewellery Designs" class="menu-item"
+        <v-list-item to="/schedule" @click="handleNavClick" :title="$t('nav.schedule')" class="menu-item"
           active-class="active-item" />
-        <v-list-item to="/guidelines" @click="handleNavClick" title="Guidelines" class="menu-item"
+        <v-list-item to="/gallery" @click="handleNavClick" :title="$t('nav.gallery')" class="menu-item"
           active-class="active-item" />
-        <v-list-item to="/aftercare" @click="handleNavClick" title="Aftercare Tips" class="menu-item"
+        <v-list-item to="/guidelines" @click="handleNavClick" :title="$t('nav.guidelines')" class="menu-item"
+          active-class="active-item" />
+        <v-list-item to="/aftercare" @click="handleNavClick" :title="$t('nav.aftercare')" class="menu-item"
           active-class="active-item" />
       </v-list>
     </v-navigation-drawer>
@@ -32,7 +37,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+const { locale } = useI18n()
 import { allowNavigation } from './router/index'
+import LanguageToggle from './components/LanguageToggle.vue'
 
 const drawer = ref(false)
 
@@ -45,6 +53,10 @@ const handleNavClick = () => {
   allowNavigation();
   drawer.value = false;
 };
+
+const onLanguageChange = (newLocale: string) => {
+  locale.value = newLocale
+}
 </script>
 
 <style scoped>

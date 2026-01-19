@@ -17,6 +17,7 @@ import '@fontsource/roboto/900-italic.css'
 
 // Vuetify
 import 'vuetify/styles'
+import i18n from './i18n'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
@@ -30,4 +31,4 @@ const vuetify = createVuetify({
   directives,
 })
 
-createApp(App).use(vuetify).use(router).mount('#app')
+createApp(App).use(vuetify).use(router).use(i18n).mount('#app')

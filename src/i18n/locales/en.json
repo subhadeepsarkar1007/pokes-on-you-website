@@ -1,0 +1,142 @@
+{
+  "nav": {
+    "home": "Home",
+    "schedule": "Schedule Appointment",
+    "gallery": "Jewellery Designs",
+    "guidelines": "Guidelines",
+    "aftercare": "Aftercare Tips"
+  },
+  "guidelines": {
+    "title": "Appointment Policies",
+    "bookingFeeHeader": "Booking Fee:",
+    "bookingFeeList": [
+      "A booking fee of <strong>₹200 per person</strong> is required to prioritize serious clients, plan slots, and begin sterilization.",
+      "The booking fee will be adjusted against the final amount.",
+      "This fee is <strong>non-refundable</strong> for no-shows or cancellations made less than 12 hours before the appointment."
+    ],
+    "durationHeader": "Appointment Duration:",
+    "durationList": [
+      "Each appointment is allotted <strong>2 hours</strong>.",
+      "Please arrive within the first 30 minutes. Late arrivals may result in cancellation.",
+      "If you arrive beyond the allotted slot, you will need to rebook."
+    ],
+    "numberedPoints": [
+      {
+        "title": "Hygiene and Preparation",
+        "content": [
+          "<strong>Thorough Cleaning:</strong> The area to be pierced must be cleaned prior to arrival.",
+          "<strong>Avoidance of Irritants:</strong> Do not apply makeup, lotions, or perfumes to the site.",
+          "<strong>Grooming:</strong> Perform grooming at least 2 days prior."
+        ]
+      },
+      {
+        "title": "Health and Safety",
+        "content": [
+          "<strong>Pre-Piercing Research:</strong> Understand that a piercing is an open wound.",
+          "<strong>Pregnancy:</strong> Do not get pierced if you are pregnant."
+        ]
+      },
+      {
+        "title": "Anatomical Assessment",
+        "content": ["Certain piercings require an anatomical assessment via photos."]
+      },
+      {
+        "title": "Substance Restrictions",
+        "content": ["Do not consume alcohol or drugs 12 hours before or after your appointment."]
+      },
+      {
+        "title": "Medical Intervention",
+        "content": ["Severe complications may require professional medical advice."]
+      },
+      {
+        "title": "Hygiene Protocols",
+        "content": ["I adhere to strict hygiene and safety protocols."]
+      },
+      {
+        "title": "Piercing Limitations",
+        "content": ["Maximum of 3 piercings per sitting. Wait 2 months before piercing the second ear cartilage."]
+      },
+      {
+        "title": "Jewelry",
+        "content": ["Basic implant-grade jewelry is provided. Initial jewelry must not be removed for 2 months."]
+      },
+      {
+        "title": "Aftercare Commitment",
+        "content": ["Proper aftercare is your sole responsibility. Healing takes time."]
+      },
+      {
+        "title": "Gallery Contribution",
+        "content": ["Provide clear photos of your healing piercing for the gallery."]
+      },
+      {
+        "title": "Travel and Lifestyle",
+        "content": ["Avoid pools or beaches for 1 month after piercing."]
+      },
+      {
+        "title": "Piercer Fallibility",
+        "content": ["If a piercing is placed incorrectly, I may offer to re-pierce the area."]
+      }
+    ]
+  },
+  "aftercare": {
+    "title": "General Tips for Piercing Care",
+    "navelTitle": "Navel Piercing:",
+    "oralTitle": "Oral Piercing:",
+    "externalLinkBtn": "SafePiercing.org Aftercare",
+    "generalTips": [
+      "Clean your piercings 1-2 times a day with saline solution. Avoid over-cleaning.",
+      "Don't touch, twist, or play with your piercings. Follow LITHA (Leave It The Hell Alone).",
+      "Don't touch your piercings with dirty hands. Wash your hands prior to touching.",
+      "Keep your piercings dry. After cleaning/bathing, gently dry your piercings.",
+      "Do not sleep on your piercing or cause trauma (hitting, snagging, or pressure).",
+      "Pain, irritation, redness, and swelling are expected in the initial stages.",
+      "Apply a warm or cold compress (if required) for swollen piercings.",
+      "Do not change jewelry for the first 2 months unless absolutely necessary.",
+      "Sleep on a clean pillow or place a clean cloth over it.",
+      "Avoid applying ointments, betadine, or alcohol to your piercings.",
+      "Avoid harsh chemicals (soap, shampoo, makeup) around the site for a few days.",
+      "Avoid sour and spicy food for the first few days.",
+      "Avoid pools, beaches, and public water bodies for a month.",
+      "Keep your piercings at a safe distance from pets.",
+      "Monitor for migration or rejection.",
+      "Contact your piercer or a doctor for serious complications."
+    ],
+    "navelTips": [
+      "Avoid tight clothing or high-waisted pants that can rub against the piercing.",
+      "Avoid rigorous abdominal exercises for a few weeks."
+    ],
+    "oralTips": [
+      "Practice good oral hygiene.",
+      "Use mouthwash instead of brushing directly over the site.",
+      "Carry saline solution to rinse after every meal.",
+      "Avoid alcohol for a few weeks.",
+      "Avoid kissing and oral sex during the initial healing phase."
+    ]
+  },
+  "gallery": {
+    "filterAll": "all",
+    "noImages": "No images found for #{tag}",
+    "tags": {
+      "basic": "basic",
+      "hiddenhelix": "hidden helix",
+      "hanginghelix": "hanging helix",
+      "traditionalnavel": "traditional navel",
+      "floatingnavel": "floating navel",
+      "conch": "conch",
+      "daith": "daith",
+      "rook": "rook",
+      "septum": "septum",
+      "tragus": "tragus",
+      "lobe": "lobe",
+      "upperlobe": "upper lobe",
+      "traditionalhelix": "traditional helix",
+      "verticalhelix": "vertical helix",
+      "forwardhelix": "forward helix",
+      "labret": "labret",
+      "eyebrow": "eyebrow",
+      "tongue": "tongue",
+      "nipple": "nipple"
+    }
+  }
+}
+
