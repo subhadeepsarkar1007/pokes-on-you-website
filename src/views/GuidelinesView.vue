@@ -148,7 +148,7 @@
                 <span>&#128279;</span> Jewellery Gallery
               </router-link> for an additional fee (including floating navel upgrades).
               Please select your jewelry prior to your appointment to allow for sterilization.
-              <strong><em>Note: </em></strong> Initial jewelry must not be removed for a minimum of 2 months.
+            <div><strong><em>Note: </em></strong> Initial jewelry must not be removed for a minimum of 2 months.</div>
             </p>
           </div>
         </div>

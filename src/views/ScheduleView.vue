@@ -191,39 +191,39 @@
               extended waiting times or cancellation.</li>
             <li>If you arrive beyond the allotted slot, your appointment may be cancelled and you will need to rebook.
             </li>
-            <li>Hygiene and Preparation
+            <li><strong>Hygiene and Preparation</strong>
               <ul class="pl-3">
-                <li><strong>Thorough Cleaning:</strong> The area to be pierced must be thoroughly cleaned prior to
+                <li>Thorough Cleaning: The area to be pierced must be thoroughly cleaned prior to
                   arrival.
                   For ear piercings, please wash your hair to remove oils and dirt. For oral piercings, maintain
                   rigorous
                   oral
                   hygiene.</li>
-                <li><strong>Avoidance of Irritants:</strong> Do not apply makeup to the area for facial piercings. Avoid
+                <li>Avoidance of Irritants: Do not apply makeup to the area for facial piercings. Avoid
                   lotions, perfumes, or oils on or near the site, as these can cause irritation.</li>
-                <li><strong>Appropriate Attire:</strong> Wear comfortable clothing. For navel piercings, avoid
+                <li>Appropriate Attire: Wear comfortable clothing. For navel piercings, avoid
                   high-waisted
                   garments that put pressure on the site.</li>
-                <li><strong>Grooming:</strong> Perform grooming (e.g., haircut, hair color, eyebrow plucking) at least 2
+                <li>Grooming: Perform grooming (e.g., haircut, hair color, eyebrow plucking) at least 2
                   days
                   prior. Such practices should not be performed for roughly 2 months after the piercing.</li>
               </ul>
             </li>
-            <li> Health and Safety
+            <li> <strong>Health and Safety</strong>
               <ul class="pl-3">
-                <li><strong>Pre-Piercing Research:</strong> Research the specific piercing, procedure, healing process,
+                <li>Pre-Piercing Research: Research the specific piercing, procedure, healing process,
                   and
                   potential complications such as migration, rejection, scarring, or keloids. Understand that a piercing
                   is
                   an open wound.</li>
-                <li><strong>Health Disclosure:</strong> Inform me of any medical conditions, medications, or allergies
+                <li>Health Disclosure: Inform me of any medical conditions, medications, or allergies
                   (latex/metal). Research your family history regarding keloids and discuss it with me.</li>
-                <li><strong>Pregnancy:</strong> Do not get pierced if you are pregnant. The immune system is often too
+                <li>Pregnancy: Do not get pierced if you are pregnant. The immune system is often too
                   weak
                   during pregnancy to effectively fight potential infections.</li>
               </ul>
             </li>
-            <li> Anatomical Assessment
+            <li> <strong>Anatomical Assessment</strong>
               <ul class="pl-3">
                 <li>Certain piercings require an anatomical assessment. Be prepared to provide photos if requested to
                   determine suitability.</li>
@@ -231,7 +231,7 @@
                   I believe it is unsafe or unsuitable.</li>
               </ul>
             </li>
-            <li> Substance Restrictions
+            <li> <strong>Substance Restrictions</strong>
               <ul class="pl-3">
                 <li>Do not consume alcohol or drugs before your appointment, as they affect blood clotting. Do not
                   consume
@@ -240,15 +240,14 @@
                   meal beforehand.</li>
               </ul>
             </li>
-            <li> Medical Intervention
+            <li> <strong>Medical Intervention</strong>
               <ul class="pl-3">
                 <li>Severe complications like infections or keloids may require professional medical advice. Understand
                   that
                   irritation bumps are part of the healing process, whereas keloids tend to be genetic.</li>
-
               </ul>
             </li>
-            <li> Hygiene and Safety Protocols
+            <li> <strong>Hygiene and Safety Protocols</strong>
               <ul class="pl-3">
                 <li>I adhere to strict hygiene and safety protocols. You are welcome to ask questions regarding my
                   practices
@@ -256,7 +255,7 @@
 
               </ul>
             </li>
-            <li> Piercing Limitations
+            <li> <strong>Piercing Limitations</strong>
               <ul class="pl-3">
                 <li>A maximum of 3 piercings will be performed in one sitting per person. For ear cartilage, only one
                   ear
@@ -265,29 +264,30 @@
 
               </ul>
             </li>
-            <li> Jewelry
+            <li> <strong>Jewelry</strong>
               <ul class="pl-3">
                 <li>Piercing rates include basic implant-grade titanium jewelry. Decorative options are available in the
                   Jewellery Gallery for an additional fee (including floating navel upgrades).
                   Please select your jewelry prior to your appointment to allow for sterilization.
-                  <strong><em>Note: </em></strong> Initial jewelry must not be removed for a minimum of 2 months.
+                  <div><strong><em>Note: </em></strong> Initial jewelry must not be removed for a minimum of 2 months.
+                  </div>
                 </li>
               </ul>
             </li>
-            <li> Aftercare Commitment
+            <li> <strong>Aftercare Commitment</strong>
               <ul class="pl-3">
                 <li>Proper aftercare is your sole responsibility. Understand that jewelry acts as a foreign body and a
                   medium for contaminants. Healing takes time.</li>
 
               </ul>
             </li>
-            <li> Gallery Contribution
+            <li> <strong>Gallery Contribution</strong>
               <ul class="pl-3">
                 <li>You are expected to provide clear, self-taken photos of your healing piercing for my gallery.</li>
 
               </ul>
             </li>
-            <li> Travel and Lifestyle
+            <li> <strong>Travel and Lifestyle</strong>
               <ul class="pl-3">
                 <li>Plan your appointment only if you have no travel plans and do not intend to visit pools or beaches
                   within
@@ -296,16 +296,14 @@
 
               </ul>
             </li>
-            <li> Piercer Fallibility
+            <li> <strong>Piercer Fallibility</strong>
               <ul class="pl-3">
                 <li>Piercers are human and capable of making mistakes. If a piercing is placed incorrectly or at a
-                  suboptimal
-                  angle, I will assess the situation and may offer to re-pierce the area to correct the error.</li>
-
+                  suboptimal angle, I will assess the situation and may offer to re-pierce the area to correct the
+                  error.
+                </li>
               </ul>
             </li>
-
-
           </ul>
         </div>
 
@@ -550,6 +548,14 @@ const getDailyTotal = (date: any) => {
 
 const isDateAvailable = (date: any) => {
   const d = new Date(date);
+  const now = new Date();
+
+  // --- NEW LOGIC: Disable today if it's past 4 PM ---
+  const isToday = d.toDateString() === now.toDateString();
+  if (isToday && now.getHours() >= 16) {
+    return false;
+  }
+
   const dayOfWeek = d.getDay();
   if (dayOfWeek === 1) return false; // Monday check
 
