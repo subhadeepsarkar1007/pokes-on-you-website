@@ -652,6 +652,10 @@ const submitForm = async () => {
     });
 
     submitted.value = true;
+
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
   } catch (e) {
     console.error("Error adding document: ", e);
     alert("Failed to save booking. Please try again.");
