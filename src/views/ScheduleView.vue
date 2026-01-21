@@ -12,7 +12,7 @@
           <h2 class="text-center mb-6 menu-title">Booking Confirmation</h2>
 
           <div class="status-badge mb-6">
-            <span>✅Request Received</span>
+            <span>✅ Request Received</span>
           </div>
 
           <div class="confirmation-details mb-6">
@@ -52,7 +52,15 @@
           <div class="grand-total-section mb-6 pa-4 text-center">
             <div class="text-overline">Booking Fee Due</div>
             <div class="text-h4 font-weight-black">₹{{ bookingFee }}</div>
+            <div class="pa-4">
+              <img src="../assets/payment-qr.jpg" alt="Payment QR Code" class="payment-qr" />
+            </div>
             <div class="text-caption mt-1">Total Est. Service: ₹{{ grandTotal }}</div>
+            <div class="text-caption mt-1"> Balance Due after Service: ₹{{ grandTotal - bookingFee }} </div>
+            <div class="ma-4 text-caption text-error">
+              <em>*Take a screenshot of the details above and provide a screenshot after
+                completeing the booking fee payment</em>
+            </div>
           </div>
         </div>
 
@@ -98,8 +106,8 @@
             <div class="d-flex justify-space-between align-center mb-2">
               <div>
                 <label class="section-title">Piercee #{{ index + 1 }}</label>
-                <div class="text-caption" :class="getTotalWeight(index) >= 3 ? 'text-error' : ''">
-                  Slots used: {{ getTotalWeight(index) }} / 3
+                <div class="text-caption text-error">
+                  <em>Choose piercings (max 3)</em>
                 </div>
               </div>
               <div class="text-right">
@@ -109,7 +117,7 @@
 
             <v-text-field density="compact" v-model="p.name" :rules="rules.required"
               :placeholder="`Person ${index + 1} Name`" variant="underlined" class="mb-4 custom-input-underlined" />
-            <label class="field-label-small">Piercing Selections</label>
+            <label class="field-label-small">Piercing Selections ({{ getTotalWeight(index) }}/3) </label>
             <div v-for="(sel, sIdx) in p.selections" :key="sIdx" class="d-flex align-center mt-2 animate-in">
               <v-select density="compact" v-model="sel.piercing" :items="piercingOptions" :rules="rules.required"
                 item-title="label" return-object placeholder="Choose Piercing" variant="underlined"
@@ -259,12 +267,11 @@
             </li>
             <li> Jewelry
               <ul class="pl-3">
-                <li>Basic implant-grade jewelry is provided. If you would like to select fancy jewelry for your
-                  piercing, options are available to view in the
-                  Jewellery designs gallery
-                  Please inform me of your choice before your appointment day to allow sufficient time for
-                  sterilization. Initial jewelry must not be removed for a minimum of 2 months.</li>
-
+                <li>Piercing rates include basic implant-grade titanium jewelry. Decorative options are available in the
+                  Jewellery Gallery for an additional fee (including floating navel upgrades).
+                  Please select your jewelry prior to your appointment to allow for sterilization.
+                  <strong><em>Note: </em></strong> Initial jewelry must not be removed for a minimum of 2 months.
+                </li>
               </ul>
             </li>
             <li> Aftercare Commitment
@@ -645,23 +652,42 @@ const submitForm = async () => {
   }
 }
 
+const cleanupPastAppointments = async () => {
+  // Get today's date at the very start of the day (00:00:00)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Filter local appointments that have already loaded
+  // or run a specific query to find old ones
+  const pastAppointments = appointments.value.filter(app => {
+    const appDate = app.date.toDate ? app.date.toDate() : new Date(app.date);
+    return appDate < today;
+  });
+
+  if (pastAppointments.length === 0) return;
+
+  // Use a Batch to delete multiple documents at once for efficiency
+  const batch = writeBatch(db);
+  pastAppointments.forEach((app) => {
+    const docRef = doc(db, "appointments", app.id);
+    batch.delete(docRef);
+  });
+
+  try {
+    await batch.commit();
+    console.log(`${pastAppointments.length} old appointments cleared.`);
+  } catch (e) {
+    console.error("Error cleaning up old appointments:", e);
+  }
+};
+
 onMounted(() => {
   const q = query(collection(db, "appointments"), orderBy("createdAt", "desc"));
 
   onSnapshot(q, (snapshot) => {
     appointments.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    const summary = appointments.value.reduce((acc: any, app) => {
-      const d = app.date?.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date);
-      const key = d.toDateString();
-      acc[key] = (acc[key] || 0) + (Number(app.count) || 0);
-      return acc;
-    }, {});
-
-    console.log("--- LIVE BOOKING TALLY ---");
-    Object.entries(summary).forEach(([date, count]) => {
-      console.log(`${date}: ${count} piercee(s) ${count >= 3 ? '[FULL - RED]' : '[AVAILABLE]'}`);
-    });
+    cleanupPastAppointments();
   });
 })
 
@@ -672,6 +698,10 @@ onMounted(() => {
   width: 100%;
   min-height: 100vh;
   position: relative;
+  background-image: url('../assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
 .secondary-bg-abs {
@@ -745,6 +775,15 @@ onMounted(() => {
   border: 1px dashed #8b76a2;
   border-radius: 15px;
   color: #4a4a4a;
+}
+
+.payment-qr {
+  max-width: 100%;
+  /* Ensures it never overflows its parent width */
+  height: auto;
+  /* Maintains aspect ratio */
+  display: block;
+  /* Removes bottom whitespace common in images */
 }
 
 .custom-input :deep(.v-field) {

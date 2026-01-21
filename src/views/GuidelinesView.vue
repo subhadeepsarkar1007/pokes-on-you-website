@@ -143,13 +143,12 @@
           <div class="guideline-body">
             <h3>Jewelry</h3>
             <p>
-              Basic implant-grade jewelry is provided. If you would like to select fancy jewelry for your
-              piercing, options are available to view in the
+              Piercing rates include basic implant-grade titanium jewelry. Decorative options are available in the
               <router-link to="/gallery" class="gallery-inline-link">
-                <span>&#128279;</span> Jewellery designs gallery
-              </router-link>.
-              Please inform me of your choice before your appointment day to allow sufficient time for
-              sterilization. Initial jewelry should not be removed for a minimum of 2 months.
+                <span>&#128279;</span> Jewellery Gallery
+              </router-link> for an additional fee (including floating navel upgrades).
+              Please select your jewelry prior to your appointment to allow for sterilization.
+              <strong><em>Note: </em></strong> Initial jewelry must not be removed for a minimum of 2 months.
             </p>
           </div>
         </div>
@@ -207,6 +206,10 @@
   width: 100%;
   min-height: 100vh;
   position: relative;
+  background-image: url('../assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
 .secondary-bg-abs {

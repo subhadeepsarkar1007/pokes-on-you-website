@@ -169,6 +169,14 @@ const deleteEntry = async () => {
 </script>
 
 <style scoped>
+.page-container {
+  width: 100%;
+  background-image: url('../assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
 .admin-container {
   max-width: 100%;
   padding: 16px;

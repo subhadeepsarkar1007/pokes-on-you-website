@@ -11,6 +11,10 @@
 <style scoped>
 .page-container {
   width: 100%;
+  background-image: url('../assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
 .secondary-bg-abs {

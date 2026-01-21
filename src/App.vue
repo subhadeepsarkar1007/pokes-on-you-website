@@ -15,7 +15,7 @@
         <v-list-item to="/" @click="handleNavClick" title="Home" class="menu-item" active-class="active-item" />
         <v-list-item to="/schedule" @click="handleNavClick" title="Schedule Appointment" class="menu-item"
           active-class="active-item" />
-        <v-list-item to="/gallery" @click="handleNavClick" title="Jewellery Designs" class="menu-item"
+        <v-list-item to="/gallery" @click="handleNavClick" title="Jewellery Gallery" class="menu-item"
           active-class="active-item" />
         <v-list-item to="/guidelines" @click="handleNavClick" title="Guidelines" class="menu-item"
           active-class="active-item" />

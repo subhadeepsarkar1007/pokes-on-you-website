@@ -68,7 +68,7 @@ const modules = import.meta.glob('/src/assets/*.{png,jpg,jpeg,svg,gif,webp}', {
   eager: false,
 }) as Record<string, () => Promise<{ default: string }>>
 
-const exclude = ['logo.jpg', 'icon.jpg']
+const exclude = ['background.jpg', 'logo.jpg', 'icon.jpg', 'payment-qr.jpg']
 const filterTags = ['basic', 'hiddenhelix', 'hanginghelix', "flat", 'traditionalnavel', 'floatingnavel', 'conch', 'daith', 'rook', 'septum', 'tragus', 'lobe', 'upperlobe', 'traditionalhelix', 'verticalhelix', 'forwardhelix', 'labret', 'eyebrow', 'tongue', 'nipple']
 
 interface GalleryImage {
@@ -122,6 +122,10 @@ function open(index: number) {
   width: 100%;
   min-height: 100vh;
   position: relative;
+  background-image: url('../assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
 .secondary-bg-abs {

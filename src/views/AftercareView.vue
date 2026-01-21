@@ -76,6 +76,10 @@
   width: 100%;
   min-height: 100vh;
   position: relative;
+  background-image: url('../assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
 
 .secondary-bg-abs {
