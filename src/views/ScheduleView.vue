@@ -26,7 +26,10 @@
                 <div class="value">{{ formattedDisplayDate }}</div>
                 <div class="value">{{ booking.slot }}</div>
               </span>
-              <!-- <span class="value">{{ formattedDisplayDate }} at {{ booking.slot }}</span> -->
+            </div>
+            <div class="detail-row">
+              <span class="label">Reporting Time:</span>
+              <span class="value">{{ reportingTime }}</span>
             </div>
           </div>
 
@@ -327,7 +330,7 @@
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted } from 'vue'
 import { db } from '../firebase'
-import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, } from 'firebase/firestore'
+import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, doc, writeBatch } from 'firebase/firestore'
 
 const formRef = ref<any>(null)
 const valid = ref(false)
@@ -661,6 +664,24 @@ const submitForm = async () => {
     alert("Failed to save booking. Please try again.");
   }
 }
+
+const reportingTime = computed(() => {
+  if (!booking.slot) return '';
+
+  // Extract the start time (e.g., "12:00pm" from "12:00pm-2:00pm")
+  const startTime = booking.slot.split('-')[0].trim();
+
+  // Map specific start times to their reporting windows
+  const timeMap: Record<string, string> = {
+    '12:00pm': '12:00pm - 12:30pm',
+    '1:00pm': '1:00pm - 1:30pm',
+    '2:00pm': '2:00pm - 2:30pm',
+    '3:00pm': '3:00pm - 3:30pm',
+    '4:00pm': '4:00pm - 4:30pm'
+  };
+
+  return timeMap[startTime] || startTime;
+});
 
 const cleanupPastAppointments = async () => {
   // Get today's date at the very start of the day (00:00:00)
