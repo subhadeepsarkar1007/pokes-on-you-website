@@ -16,9 +16,8 @@
           </div>
 
           <div class="ma-4 text-caption text-error">
-              <em>*Take a screenshot of the details above and provide a screenshot after
-                completeing the booking fee payment</em>
-            </div>
+            <em>*Take a screenshot of the details and provide a screenshot after completeing the booking fee payment</em>
+          </div>
 
           <div class="confirmation-details mb-6">
             <div class="detail-row">
