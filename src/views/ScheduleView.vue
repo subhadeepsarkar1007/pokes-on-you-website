@@ -399,14 +399,14 @@ const bookingFee = computed(() => {
 })
 
 const getPersonTotal = (pIndex: number) => {
-  return booking.piercees[pIndex].selections.reduce((sum, sel) => {
+  return booking.piercees[pIndex]?.selections.reduce((sum, sel) => {
     const basePrice = sel.piercing?.price || 0
     return sum + (sel.isPair ? basePrice * 2 : basePrice)
   }, 0)
 }
 
 const grandTotal = computed(() => {
-  return booking.piercees.reduce((sum, _, index) => sum + getPersonTotal(index), 0)
+  return (booking.piercees || []).reduce((sum, _, index) => sum + (getPersonTotal(index) || 0), 0);
 })
 
 const formattedDisplayDate = computed(() => {
@@ -423,17 +423,23 @@ const formattedDisplayDate = computed(() => {
 })
 
 const getTotalWeight = (pIndex: number) => {
-  return booking.piercees[pIndex].selections.reduce((sum, sel) => sum + (sel.isPair ? 2 : 1), 0)
+  return booking.piercees?.[pIndex]?.selections.reduce((sum, sel) => sum + (sel.isPair ? 2 : 1), 0) ?? 0;
 }
 
 const addPiercingField = (pIndex: number) => {
   if (getTotalWeight(pIndex) < 3) {
-    booking.piercees[pIndex].selections.push({ piercing: null, isPair: false })
+    const piercee = booking.piercees?.[pIndex];
+    if (piercee) {
+      piercee.selections.push({ piercing: null, isPair: false });
+    }
   }
 }
 
 const removePiercingField = (pIndex: number, sIndex: number) => {
-  booking.piercees[pIndex].selections.splice(sIndex, 1)
+  const piercee = booking.piercees?.[pIndex];
+  if (piercee) {
+    piercee.selections.splice(sIndex, 1);
+  }
 }
 
 const syncPiercees = (val: number) => {
@@ -669,7 +675,7 @@ const reportingTime = computed(() => {
   if (!booking.slot) return '';
 
   // Extract the start time (e.g., "12:00pm" from "12:00pm-2:00pm")
-  const startTime = booking.slot.split('-')[0].trim();
+  const startTime = (booking.slot || "").split('-')[0]?.trim() || "";
 
   // Map specific start times to their reporting windows
   const timeMap: Record<string, string> = {
