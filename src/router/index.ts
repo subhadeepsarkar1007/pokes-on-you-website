@@ -17,7 +17,7 @@ const router = createRouter({
     { path: '/gallery', name: 'gallery', component: () => import('../views/GalleryView.vue') },
     { path: '/guidelines', name: 'guidelines', component: () => import('../views/GuidelinesView.vue') },
     { path: '/aftercare', name: 'aftercare', component: () => import('../views/AftercareView.vue') },
-    { path: '/admin/12345aeiou', name: 'admin', component: () => import('../views/AdminView.vue') },
+    { path: '/admin/7K9x2M5pW1rB8vQz', name: 'admin', component: () => import('../views/AdminView.vue') },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })
@@ -30,7 +30,7 @@ router.beforeEach((to, from, next) => {
 
   // 2. Allow navigation from Navigation Drawer
   if (isMenuNavigation) {
-    isMenuNavigation = false; 
+    isMenuNavigation = false;
     return next();
   }
 
