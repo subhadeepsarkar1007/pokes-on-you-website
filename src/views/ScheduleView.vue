@@ -15,8 +15,8 @@
             <span>✅ Request Received</span>
           </div>
 
-          <div class="ma-4 text-caption text-error">
-            <em>*Take a screenshot of the details and provide a screenshot after completeing the booking fee payment</em>
+          <div class="my-6 text-caption text-error">
+            <em>*Please capture a screenshot of the booking details and share the payment confirmation receipt once the payment has been processed.</em>
           </div>
 
           <div class="confirmation-details mb-6">
@@ -384,6 +384,7 @@ const piercingOptions = [
   { label: 'Septum (₹1000)', price: 1000 },
   { label: 'Navel (₹1000)', price: 1000 },
   { label: 'Eyebrow (₹1000)', price: 1000 },
+  { label: 'Bridge (₹1000)', price: 1000 },
   { label: 'Lip (₹1000)', price: 1000 },
   { label: 'Vertical Labret (₹1000)', price: 1000 },
   { label: 'Tongue (₹1000)', price: 1000 },
