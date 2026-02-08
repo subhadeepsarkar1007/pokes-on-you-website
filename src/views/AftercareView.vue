@@ -12,22 +12,37 @@
 
         <ul class="guideline-list mb-6">
           <li>Clean your piercings 1-2 times a day with saline solution. Avoid over-cleaning.</li>
-          <li>Don't touch, twist, or play with your piercings. Follow LITHA (Leave It The Hell Alone).</li>
-          <li>Don't touch your piercings with dirty hands. Wash your hands prior to touching the piercing.</li>
-          <li>Keep your piercings dry. After cleaning/bathing, gently dry your piercings.</li>
-          <li>Do not sleep on your piercing or cause trauma such as hitting, snagging, pulling, or applying pressure.
+          <li>
+            Don't touch, twist, or play with your piercings. Follow LITHA (Leave It The Hell Alone).
           </li>
-          <li>Pain, irritation, redness, swelling, itchiness, and lymph fluid are expected in the initial stages of
-            healing.</li>
+          <li>
+            Don't touch your piercings with dirty hands. Wash your hands prior to touching the
+            piercing.
+          </li>
+          <li>Keep your piercings dry. After cleaning/bathing, gently dry your piercings.</li>
+          <li>
+            Do not sleep on your piercing or cause trauma such as hitting, snagging, pulling, or
+            applying pressure.
+          </li>
+          <li>
+            Pain, irritation, redness, swelling, itchiness, and lymph fluid are expected in the
+            initial stages of healing.
+          </li>
           <li>Apply a warm or cold compress (if required) for swollen or irritated piercings.</li>
-          <li>Do not change your jewelry for the first 2 months after getting pierced, until absolutely necessary, or as
-            advised by the piercer.</li>
+          <li>
+            Do not change your jewelry for the first 2 months after getting pierced, until
+            absolutely necessary, or as advised by the piercer.
+          </li>
           <li>Sleep on a clean pillow or place a clean cloth over your pillow while sleeping.</li>
           <li>Avoid applying ointments, betadine, or alcohol to your piercings.</li>
-          <li>Avoid harsh soap, shampoo, face wash, makeup, or any chemical products around your piercings for a few
-            days.</li>
+          <li>
+            Avoid harsh soap, shampoo, face wash, makeup, or any chemical products around your
+            piercings for a few days.
+          </li>
           <li>Avoid sour and spicy food for the first few days.</li>
-          <li>Avoid pools and beaches, any public water bodies for a month after getting pierced.</li>
+          <li>
+            Avoid pools and beaches, any public water bodies for a month after getting pierced.
+          </li>
           <li>Keep your piercings at a safe distance from pets.</li>
           <li>Monitor for migration or rejection.</li>
           <li>Contact your piercer or a doctor for serious complications.</li>
@@ -38,8 +53,10 @@
         <div class="policy-group mb-6">
           <h3 class="group-header">Navel Piercing:</h3>
           <ul class="guideline-list">
-            <li>Avoid tight clothing or high-waisted pants that can rub against the piercing, cause trauma, or irritate
-              the site.</li>
+            <li>
+              Avoid tight clothing or high-waisted pants that can rub against the piercing, cause
+              trauma, or irritate the site.
+            </li>
             <li>Avoid rigorous abdominal exercises for a few weeks.</li>
           </ul>
         </div>
@@ -60,13 +77,17 @@
         <v-divider class="my-8 custom-divider"></v-divider>
 
         <div class="d-flex justify-center mb-6">
-          <v-btn variant="outlined" color="primary" href="https://safepiercing.org/aftercare/" target="_blank"
-            rounded="lg">
+          <v-btn
+            variant="outlined"
+            color="primary"
+            href="https://safepiercing.org/aftercare/"
+            target="_blank"
+            rounded="lg"
+          >
             SafePiercing.org Aftercare
           </v-btn>
         </div>
       </v-card>
-
     </v-container>
   </div>
 </template>
@@ -119,7 +140,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
   z-index: 2;
   backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important
+  -webkit-backdrop-filter: none !important;
 }
 
 .section-title {

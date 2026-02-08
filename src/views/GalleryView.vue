@@ -8,14 +8,21 @@
 
     <v-container fluid class="gallery-container">
       <v-row class="filter-wrapper d-flex flex-wrap justify-center mb-6">
-        <v-chip :class="['ma-1 filter-chip', !selectedFilter ? 'active-chip' : 'glass-chip']" elevation="0"
-          @click="selectedFilter = null">
+        <v-chip
+          :class="['ma-1 filter-chip', !selectedFilter ? 'active-chip' : 'glass-chip']"
+          elevation="0"
+          @click="selectedFilter = null"
+        >
           #all
         </v-chip>
 
-        <v-chip v-for="tag in filterTags" :key="tag"
-          :class="['ma-1 filter-chip', selectedFilter === tag ? 'active-chip' : 'glass-chip']" elevation="0"
-          @click="toggleFilter(tag)">
+        <v-chip
+          v-for="tag in filterTags"
+          :key="tag"
+          :class="['ma-1 filter-chip', selectedFilter === tag ? 'active-chip' : 'glass-chip']"
+          elevation="0"
+          @click="toggleFilter(tag)"
+        >
           #{{ tag }}
         </v-chip>
       </v-row>
@@ -23,8 +30,15 @@
       <v-row dense>
         <v-col v-for="(img, index) in filteredImages" :key="img" cols="4" sm="4" md="4">
           <v-card class="ma-1 gallery-card" flat color="transparent">
-            <v-img :src="img" aspect-ratio="1" cover class="gallery-thumb loading-blur" loading="lazy"
-              @click="open(index)" @load="(e) => e.target.closest('.v-img').classList.remove('loading-blur')">
+            <v-img
+              :src="img"
+              aspect-ratio="1"
+              cover
+              class="gallery-thumb loading-blur"
+              loading="lazy"
+              @click="open(index)"
+              @load="(e) => e.target.closest('.v-img').classList.remove('loading-blur')"
+            >
               <template v-slot:placeholder>
                 <div class="placeholder-skeleton"></div>
               </template>
@@ -35,7 +49,7 @@
 
       <v-row v-if="filteredImages.length === 0" justify="center" class="mt-10 animate-in">
         <v-col cols="12" class="text-center">
-          <p class="text-subtitle-1 mt-2" style="color: #444; font-weight: 500;">
+          <p class="text-subtitle-1 mt-2" style="color: #444; font-weight: 500">
             No images found for #{{ selectedFilter }}
           </p>
         </v-col>
@@ -45,8 +59,12 @@
         <v-card class="dialog-card glass-morphism-dialog" flat @click="dialog = false">
           <v-card-text class="pa-0 d-flex align-center justify-center">
             <div class="image-wrapper">
-              <v-img :src="filteredImages[selectedIndex]" class="dialog-image" content-class="custom-img-fit"
-                transition="fade-transition">
+              <v-img
+                :src="filteredImages[selectedIndex]"
+                class="dialog-image"
+                content-class="custom-img-fit"
+                transition="fade-transition"
+              >
                 <template v-slot:placeholder>
                   <v-row class="fill-height ma-0" align="center" justify="center">
                     <v-progress-circular indeterminate color="#7b62a3" />
@@ -69,7 +87,30 @@ const modules = import.meta.glob('/src/assets/*.{png,jpg,jpeg,svg,gif,webp}', {
 }) as Record<string, () => Promise<{ default: string }>>
 
 const exclude = ['background.jpg', 'logo.jpg', 'icon.jpg', 'payment-qr.jpg']
-const filterTags = ['basic', 'hiddenhelix', 'hanginghelix', "flat", 'traditionalnavel', 'floatingnavel', 'conch', 'daith', 'rook', 'septum', 'tragus', 'lobe', 'upperlobe', 'traditionalhelix', 'verticalhelix', 'forwardhelix', 'labret', 'nose','eyebrow', 'bridge', 'tongue', 'nipple']
+const filterTags = [
+  'basic',
+  'hiddenhelix',
+  'hanginghelix',
+  'flat',
+  'traditionalnavel',
+  'floatingnavel',
+  'conch',
+  'daith',
+  'rook',
+  'septum',
+  'tragus',
+  'lobe',
+  'upperlobe',
+  'traditionalhelix',
+  'verticalhelix',
+  'forwardhelix',
+  'labret',
+  'nose',
+  'eyebrow',
+  'bridge',
+  'tongue',
+  'nipple',
+]
 
 interface GalleryImage {
   url: string
@@ -92,7 +133,7 @@ onMounted(async () => {
       const mod = await modules[path]()
       return {
         url: mod.default,
-        name: path.split('/').pop()?.toLowerCase() || ''
+        name: path.split('/').pop()?.toLowerCase() || '',
       }
     })
   )
@@ -101,10 +142,10 @@ onMounted(async () => {
 
 const filteredImagesList = computed(() => {
   if (!selectedFilter.value) return allImages.value
-  return allImages.value.filter(img => img.name.includes(selectedFilter.value!.toLowerCase()))
+  return allImages.value.filter((img) => img.name.includes(selectedFilter.value!.toLowerCase()))
 })
 
-const filteredImages = computed(() => filteredImagesList.value.map(img => img.url))
+const filteredImages = computed(() => filteredImagesList.value.map((img) => img.url))
 
 function toggleFilter(tag: string) {
   selectedFilter.value = selectedFilter.value === tag ? null : tag

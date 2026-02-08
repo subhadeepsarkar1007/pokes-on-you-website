@@ -10,17 +10,49 @@
       </v-btn>
     </v-app-bar>
 
-    <v-navigation-drawer v-model="drawer" temporary location="top" class="custom-drawer" elevation="0">
+    <v-navigation-drawer
+      v-model="drawer"
+      temporary
+      location="top"
+      class="custom-drawer"
+      elevation="0"
+    >
       <v-list nav class="drawer-list">
-        <v-list-item to="/" @click="handleNavClick" title="Home" class="menu-item" active-class="active-item" />
-        <v-list-item to="/schedule" @click="handleNavClick" title="Schedule Appointment" class="menu-item"
-          active-class="active-item" />
-        <v-list-item to="/gallery" @click="handleNavClick" title="Jewellery Gallery" class="menu-item"
-          active-class="active-item" />
-        <v-list-item to="/guidelines" @click="handleNavClick" title="Guidelines" class="menu-item"
-          active-class="active-item" />
-        <v-list-item to="/aftercare" @click="handleNavClick" title="Aftercare Tips" class="menu-item"
-          active-class="active-item" />
+        <v-list-item
+          to="/"
+          @click="handleNavClick"
+          title="Home"
+          class="menu-item"
+          active-class="active-item"
+        />
+        <v-list-item
+          to="/schedule"
+          @click="handleNavClick"
+          title="Schedule Appointment"
+          class="menu-item"
+          active-class="active-item"
+        />
+        <v-list-item
+          to="/gallery"
+          @click="handleNavClick"
+          title="Jewellery Gallery"
+          class="menu-item"
+          active-class="active-item"
+        />
+        <v-list-item
+          to="/guidelines"
+          @click="handleNavClick"
+          title="Guidelines"
+          class="menu-item"
+          active-class="active-item"
+        />
+        <v-list-item
+          to="/aftercare"
+          @click="handleNavClick"
+          title="Aftercare Tips"
+          class="menu-item"
+          active-class="active-item"
+        />
       </v-list>
     </v-navigation-drawer>
 
@@ -42,9 +74,9 @@ const appStyle = {
 }
 
 const handleNavClick = () => {
-  allowNavigation();
-  drawer.value = false;
-};
+  allowNavigation()
+  drawer.value = false
+}
 </script>
 
 <style scoped>

@@ -4,10 +4,16 @@
 
     <v-container class="admin-container">
       <v-card class="custom-glass-card">
-
-
-        <v-data-table v-model:expanded="expandedRows" :items="appointments" item-value="id" show-expand
-          class="transparent-table" items-per-page="-1" hide-default-footer :headers="headers">
+        <v-data-table
+          v-model:expanded="expandedRows"
+          :items="appointments"
+          item-value="id"
+          show-expand
+          class="transparent-table"
+          items-per-page="-1"
+          hide-default-footer
+          :headers="headers"
+        >
           <template v-slot:item="{ internalItem, item, index, toggleExpand, isExpanded }">
             <tr :class="index % 2 === 0 ? 'row-even' : 'row-odd'" class="mobile-row">
               <td class="pa-4">
@@ -27,8 +33,12 @@
                       {{ item.count }}
                     </v-chip>
 
-                    <v-btn :icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'" variant="text"
-                      density="comfortable" @click="toggleExpand(internalItem)"></v-btn>
+                    <v-btn
+                      :icon="isExpanded(internalItem) ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+                      variant="text"
+                      density="comfortable"
+                      @click="toggleExpand(internalItem)"
+                    ></v-btn>
                   </div>
                 </div>
               </td>
@@ -44,7 +54,11 @@
                       <strong>{{ p.name }}</strong>
                     </div>
                     <div class="text-caption pl-6 text-grey-darken-2">
-                      {{p.selections.map(s => `${s.piercing.label}${s.isPair ? ' (Pair)' : ''}`).join(', ')}}
+                      {{
+                        p.selections
+                          .map((s) => `${s.piercing.label}${s.isPair ? ' (Pair)' : ''}`)
+                          .join(', ')
+                      }}
                     </div>
                   </div>
 
@@ -57,9 +71,14 @@
                     <div class="text-caption d-flex align-center">
                       {{ item.email }}
                     </div>
-                    <v-btn color="red-lighten-4" class="text-red-darken-4 mt-4" flat block size="small"
-                      @click="confirmDelete(item.id)">
-
+                    <v-btn
+                      color="red-lighten-4"
+                      class="text-red-darken-4 mt-4"
+                      flat
+                      block
+                      size="small"
+                      @click="confirmDelete(item.id)"
+                    >
                       Delete Appointment
                     </v-btn>
                   </div>
@@ -89,81 +108,85 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { db } from '../firebase'
-import { collection, query, orderBy, onSnapshot, doc, deleteDoc, writeBatch, Timestamp } from 'firebase/firestore'
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  deleteDoc,
+  writeBatch,
+  Timestamp,
+} from 'firebase/firestore'
 
 const appointments = ref<any[]>([])
 const expandedRows = ref([]) // Necessary to track expansion state
 const deleteDialog = ref(false)
 const selectedId = ref('')
 
-const headers = [
-  { title: 'Appointments', key: 'data-table-expand' },
-]
+const headers = [{ title: 'Appointments', key: 'data-table-expand' }]
 
 const cleanupPastAppointments = async () => {
   // Get today's date at the very start of the day (00:00:00)
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
   // Filter local appointments that have already loaded
   // or run a specific query to find old ones
-  const pastAppointments = appointments.value.filter(app => {
-    const appDate = app.date.toDate ? app.date.toDate() : new Date(app.date);
-    return appDate < today;
-  });
+  const pastAppointments = appointments.value.filter((app) => {
+    const appDate = app.date.toDate ? app.date.toDate() : new Date(app.date)
+    return appDate < today
+  })
 
-  if (pastAppointments.length === 0) return;
+  if (pastAppointments.length === 0) return
 
   // Use a Batch to delete multiple documents at once for efficiency
-  const batch = writeBatch(db);
+  const batch = writeBatch(db)
   pastAppointments.forEach((app) => {
-    const docRef = doc(db, "appointments", app.id);
-    batch.delete(docRef);
-  });
+    const docRef = doc(db, 'appointments', app.id)
+    batch.delete(docRef)
+  })
 
   try {
-    await batch.commit();
-    console.log(`${pastAppointments.length} old appointments cleared.`);
+    await batch.commit()
+    console.log(`${pastAppointments.length} old appointments cleared.`)
   } catch (e) {
-    console.error("Error cleaning up old appointments:", e);
+    console.error('Error cleaning up old appointments:', e)
   }
-};
+}
 
 // Update your onMounted to run the cleanup
 onMounted(() => {
-  const q = query(
-    collection(db, "appointments"),
-    orderBy("date", "asc")
-  );
+  const q = query(collection(db, 'appointments'), orderBy('date', 'asc'))
 
   onSnapshot(q, (snapshot) => {
-    appointments.value = snapshot.docs.map(doc => ({
+    appointments.value = snapshot.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data()
-    }));
+      ...doc.data(),
+    }))
 
     // Optional: Run cleanup automatically after data loads
-    cleanupPastAppointments();
-  });
+    cleanupPastAppointments()
+  })
 })
 
 const formatDate = (date: any) => {
-  if (!date) return 'N/A';
-  const d = date.toDate ? date.toDate() : new Date(date);
-  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+  if (!date) return 'N/A'
+  const d = date.toDate ? date.toDate() : new Date(date)
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
 }
 
 const confirmDelete = (id: string) => {
-  selectedId.value = id;
-  deleteDialog.value = true;
+  selectedId.value = id
+  deleteDialog.value = true
 }
 
 const deleteEntry = async () => {
   try {
-    await deleteDoc(doc(db, "appointments", selectedId.value));
-    deleteDialog.value = false;
+    await deleteDoc(doc(db, 'appointments', selectedId.value))
+    deleteDialog.value = false
   } catch (e) {
-    alert("Error deleting document");
+    alert('Error deleting document')
   }
 }
 </script>
@@ -223,7 +246,7 @@ const deleteEntry = async () => {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
   z-index: 2;
   backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important
+  -webkit-backdrop-filter: none !important;
 }
 
 .cursor-pointer {

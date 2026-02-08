@@ -16,7 +16,10 @@
           </div>
 
           <div class="my-6 text-caption text-error">
-            <em>*Please capture a screenshot of the booking details and share the payment confirmation receipt once the payment has been processed.</em>
+            <em>
+              *Please capture a screenshot of the booking details and share the payment confirmation
+              receipt once the payment has been processed.
+            </em>
           </div>
 
           <div class="confirmation-details mb-6">
@@ -63,7 +66,9 @@
               <img src="../assets/payment-qr.jpg" alt="Payment QR Code" class="payment-qr" />
             </div>
             <div class="text-caption mt-1">Total Est. Service: ₹{{ grandTotal }}</div>
-            <div class="text-caption mt-1"> Balance Due after Service: ₹{{ grandTotal - bookingFee }} </div>
+            <div class="text-caption mt-1">
+              Balance Due after Service: ₹{{ grandTotal - bookingFee }}
+            </div>
           </div>
         </div>
 
@@ -72,40 +77,105 @@
 
           <div class="input-group mb-4">
             <label class="field-label">Primary Contact Information</label>
-            <v-text-field density="compact" v-model="booking.name" :rules="rules.required" placeholder="Full Name"
-              variant="solo" class="custom-input mb-2" flat />
-            <v-text-field density="compact" v-model="booking.email" :rules="rules.email" placeholder="Email Address"
-              type="email" variant="solo" class="custom-input mb-2" flat />
-            <v-text-field density="compact" v-model="booking.phone" :rules="rules.phone" placeholder="Contact Number"
-              variant="solo" class="custom-input mb-4" flat />
+            <v-text-field
+              density="compact"
+              v-model="booking.name"
+              :rules="rules.required"
+              placeholder="Full Name"
+              variant="solo"
+              class="custom-input mb-2"
+              flat
+              @blur="booking.name = formatName(booking.name)"
+            />
+            <v-text-field
+              density="compact"
+              v-model="booking.email"
+              :rules="rules.email"
+              placeholder="Email Address"
+              type="email"
+              variant="solo"
+              class="custom-input mb-2"
+              flat
+              @blur="booking.email = booking.email.toLowerCase().trim()"
+            />
+            <v-text-field
+              density="compact"
+              v-model="booking.phone"
+              :rules="rules.phone"
+              placeholder="Contact Number"
+              variant="solo"
+              class="custom-input mb-4"
+              flat
+            />
 
             <label class="field-label">Number of People</label>
-            <v-select density="compact" v-model="booking.count" :items="[1, 2, 3]" placeholder="Select count"
-              variant="solo" class="custom-input mb-4" flat hide-details @update:model-value="syncPiercees" />
+            <v-select
+              density="compact"
+              v-model="booking.count"
+              :items="[1, 2, 3]"
+              placeholder="Select count"
+              variant="solo"
+              class="custom-input mb-4"
+              flat
+              hide-details
+              @update:model-value="syncPiercees"
+            />
           </div>
 
           <v-row dense>
             <v-col cols="12" sm="6">
               <label class="field-label">Preferred Date</label>
-              <v-menu v-model="dateMenu" :close-on-content-click="false" transition="scale-transition">
+              <v-menu
+                v-model="dateMenu"
+                :close-on-content-click="false"
+                transition="scale-transition"
+              >
                 <template v-slot:activator="{ props }">
-                  <v-text-field :model-value="formattedDisplayDate" readonly v-bind="props" placeholder="DD/MM/YYYY"
-                    variant="solo" class="custom-input" flat :rules="rules.required" />
+                  <v-text-field
+                    :model-value="formattedDisplayDate"
+                    readonly
+                    v-bind="props"
+                    placeholder="DD/MM/YYYY"
+                    variant="solo"
+                    class="custom-input"
+                    flat
+                    :rules="rules.required"
+                  />
                 </template>
-                <v-date-picker v-model="booking.date" @update:model-value="onDateSelected" :min="todayDate"
-                  :max="maxDate" :allowed-dates="isDateAvailable" :events="(date) => getDailyTotal(date) > 0"
-                  :event-color="getEventColor" color="#8b76a2" hide-title></v-date-picker>
+                <v-date-picker
+                  v-model="booking.date"
+                  @update:model-value="onDateSelected"
+                  :min="todayDate"
+                  :max="maxDate"
+                  :allowed-dates="isDateAvailable"
+                  :events="(date) => getDailyTotal(date) > 0"
+                  :event-color="getEventColor"
+                  color="#8b76a2"
+                  hide-title
+                ></v-date-picker>
               </v-menu>
             </v-col>
 
             <v-col cols="12" sm="6">
               <label class="field-label">Available Time Slots</label>
-              <v-select v-model="booking.slot" :items="availableSlots" :rules="rules.required"
-                placeholder="Select a time" variant="solo" class="custom-input" flat :disabled="!booking.date" />
+              <v-select
+                v-model="booking.slot"
+                :items="availableSlots"
+                :rules="rules.required"
+                placeholder="Select a time"
+                variant="solo"
+                class="custom-input"
+                flat
+                :disabled="!booking.date"
+              />
             </v-col>
           </v-row>
 
-          <div v-for="(p, index) in booking.piercees" :key="index" class="piercee-section pa-4 mb-6">
+          <div
+            v-for="(p, index) in booking.piercees"
+            :key="index"
+            class="piercee-section pa-4 mb-6"
+          >
             <div class="d-flex justify-space-between align-center mb-2">
               <div>
                 <label class="section-title">Piercee #{{ index + 1 }}</label>
@@ -118,37 +188,84 @@
               </div>
             </div>
 
-            <v-text-field density="compact" v-model="p.name" :rules="rules.required"
-              :placeholder="`Person ${index + 1} Name`" variant="underlined" class="mb-4 custom-input-underlined" />
-            <label class="field-label-small">Piercing Selections ({{ getTotalWeight(index) }}/3) </label>
-            <div v-for="(sel, sIdx) in p.selections" :key="sIdx" class="d-flex align-center mt-2 animate-in">
-              <v-select density="compact" v-model="sel.piercing" :items="piercingOptions" :rules="rules.required"
-                item-title="label" return-object placeholder="Choose Piercing" variant="underlined"
-                class="flex-grow-1 custom-input-underlined" hide-details clearable @update:model-value="
+            <v-text-field
+              density="compact"
+              v-model="p.name"
+              :rules="rules.required"
+              :placeholder="`Person ${index + 1} Name`"
+              variant="underlined"
+              class="mb-4 custom-input-underlined"
+              @blur="p.name = formatName(p.name)"
+            />
+            <label class="field-label-small">
+              Piercing Selections ({{ getTotalWeight(index) }}/3)
+            </label>
+            <div
+              v-for="(sel, sIdx) in p.selections"
+              :key="sIdx"
+              class="d-flex align-center mt-2 animate-in"
+            >
+              <v-select
+                density="compact"
+                v-model="sel.piercing"
+                :items="piercingOptions"
+                :rules="rules.required"
+                item-title="label"
+                return-object
+                placeholder="Choose Piercing"
+                variant="underlined"
+                class="flex-grow-1 custom-input-underlined"
+                hide-details
+                clearable
+                @update:model-value="
                   (val) => {
-                    if (!val) sel.isPair = false
+                    if (!val) {
+                      sel.isPair = false
+                    } else {
+                      checkAnatomyRequirement(val)
+                    }
                   }
-                " />
+                "
+              />
 
               <div v-if="sel.piercing" class="pair-checkbox-container">
-                <input type="checkbox" :id="'pair-' + index + '-' + sIdx" v-model="sel.isPair" class="styled-checkbox"
-                  :disabled="!sel.isPair && getTotalWeight(index) >= 3" />
+                <input
+                  type="checkbox"
+                  :id="'pair-' + index + '-' + sIdx"
+                  v-model="sel.isPair"
+                  class="styled-checkbox"
+                  :disabled="!sel.isPair && getTotalWeight(index) >= 3"
+                />
                 <label :for="'pair-' + index + '-' + sIdx" class="pair-label">Pair</label>
               </div>
 
-              <v-btn v-if="p.selections.length > 1" size="small" variant="text" color="red-lighten-2"
-                @click="removePiercingField(index, sIdx)">
+              <v-btn
+                v-if="p.selections.length > 1"
+                size="small"
+                variant="text"
+                color="red-lighten-2"
+                @click="removePiercingField(index, sIdx)"
+              >
                 ✕
               </v-btn>
             </div>
 
-            <v-btn v-if="getTotalWeight(index) < 3" size="x-small" variant="text" color="#8b76a2" class="mt-4"
-              @click="addPiercingField(index)">
+            <v-btn
+              v-if="getTotalWeight(index) < 3"
+              size="x-small"
+              variant="text"
+              color="#8b76a2"
+              class="mt-4"
+              @click="addPiercingField(index)"
+            >
               + Add Piercing
             </v-btn>
           </div>
 
-          <div v-if="grandTotal > 0" class="grand-total-section mb-6 pa-3 d-flex justify-space-between align-center">
+          <div
+            v-if="grandTotal > 0"
+            class="grand-total-section mb-6 pa-3 d-flex justify-space-between align-center"
+          >
             <span class="text-uppercase font-weight-bold">Total Est. Amount</span>
             <span class="text-h6 font-weight-black">₹{{ grandTotal }}</span>
           </div>
@@ -157,7 +274,13 @@
             {{ termsConfirmed ? '✅ Policies Reviewed' : 'Review Terms & Policies' }}
           </v-btn>
 
-          <v-btn :disabled="!formReady" block class="action-btn submit-btn" elevation="0" @click="submitForm">
+          <v-btn
+            :disabled="!formReady"
+            block
+            class="action-btn submit-btn"
+            elevation="0"
+            @click="submitForm"
+          >
             Submit Booking Request
           </v-btn>
           <div v-if="!termsConfirmed && valid" class="text-center text-error text-caption mt-2">
@@ -166,6 +289,36 @@
         </v-form>
       </v-card>
     </v-container>
+
+    <v-dialog v-model="anatomyDialog" max-width="450" persistent>
+      <v-card class="glass-card pa-6">
+        <h3 class="text-center mb-4 menu-title">Important Notice</h3>
+        <v-divider class="mb-4"></v-divider>
+
+        <div class="terms-content">
+          <div class="policy-list">
+            <div class="my-4 text-caption text-error">
+              <em> *Ignore if consultation already taken. </em>
+            </div>
+          </div>
+          <div class="policy-list">
+            Many piercings are <strong>anatomy dependent</strong>. This means a thorough assessment
+            is required to ensure the piercing can be performed safely, heal correctly, and remain
+            viable long-term. <br /><br />
+            Please consult with your piercer regarding your plans <strong>before</strong> booking.
+            If a piercing is anatomically impossible, the piercer reserves the right to decline the
+            service and cancel the booking. <br /><br />
+            If you choose to book without a prior consultation and your anatomy is found to be
+            unsuitable, the piercer may decline the procedure, and
+            <strong>your booking fee will be forfeited</strong>. <br /><br />
+          </div>
+        </div>
+
+        <v-btn block class="submit-btn action-btn" @click="anatomyDialog = false">
+          I Understand & Wish to Proceed
+        </v-btn>
+      </v-card>
+    </v-dialog>
 
     <v-dialog v-model="termsDialog" max-width="500" persistent>
       <v-card class="glass-card pa-6">
@@ -177,133 +330,179 @@
             <li>
               A booking fee of <strong>₹200 per person</strong> is required. This allows me to:
               <ul class="pl-3">
-                <li>Prioritize serious clients: I can focus on those truly ready for their piercing.</li>
-                <li>Efficiently plan slots: This helps manage my schedule and dedicate sufficient time to each
-                  individual.</li>
-                <li>Begin necessary preparation: I can start the sterilization process well in advance.</li>
+                <li>
+                  Prioritize serious clients: I can focus on those truly ready for their piercing.
+                </li>
+                <li>
+                  Efficiently plan slots: This helps manage my schedule and dedicate sufficient time
+                  to each individual.
+                </li>
+                <li>
+                  Begin necessary preparation: I can start the sterilization process well in
+                  advance.
+                </li>
               </ul>
             </li>
             <li>The booking fee will be adjusted against the final amount.</li>
             <li>
-              This fee is <strong>non-refundable</strong> in the event of a no-show or if you cancel/reschedule less
-              than 12 hours before your
-              appointment. If I must cancel the appointment, you will receive a full refund.
+              This fee is <strong>non-refundable</strong> in the event of a no-show or if you
+              cancel/reschedule less than 12 hours before your appointment. If I must cancel the
+              appointment, you will receive a full refund.
             </li>
             <li>Each appointment is allotted <strong>2 hours</strong>.</li>
-            <li>Please try to arrive within the first 30 minutes of your scheduled time. Late arrivals may result in
-              extended waiting times or cancellation.</li>
-            <li>If you arrive beyond the allotted slot, your appointment may be cancelled and you will need to rebook.
+            <li>
+              Please try to arrive within the first 30 minutes of your scheduled time. Late arrivals
+              may result in extended waiting times or cancellation.
             </li>
-            <li><strong>Hygiene and Preparation</strong>
+            <li>
+              If you arrive beyond the allotted slot, your appointment may be cancelled and you will
+              need to rebook.
+            </li>
+            <li>
+              <strong>Hygiene and Preparation</strong>
               <ul class="pl-3">
-                <li>Thorough Cleaning: The area to be pierced must be thoroughly cleaned prior to
-                  arrival.
-                  For ear piercings, please wash your hair to remove oils and dirt. For oral piercings, maintain
-                  rigorous
-                  oral
-                  hygiene.</li>
-                <li>Avoidance of Irritants: Do not apply makeup to the area for facial piercings. Avoid
-                  lotions, perfumes, or oils on or near the site, as these can cause irritation.</li>
-                <li>Appropriate Attire: Wear comfortable clothing. For navel piercings, avoid
-                  high-waisted
-                  garments that put pressure on the site.</li>
-                <li>Grooming: Perform grooming (e.g., haircut, hair color, eyebrow plucking) at least 2
-                  days
-                  prior. Such practices should not be performed for roughly 2 months after the piercing.</li>
+                <li>
+                  Thorough Cleaning: The area to be pierced must be thoroughly cleaned prior to
+                  arrival. For ear piercings, please wash your hair to remove oils and dirt. For
+                  oral piercings, maintain rigorous oral hygiene.
+                </li>
+                <li>
+                  Avoidance of Irritants: Do not apply makeup to the area for facial piercings.
+                  Avoid lotions, perfumes, or oils on or near the site, as these can cause
+                  irritation.
+                </li>
+                <li>
+                  Appropriate Attire: Wear comfortable clothing. For navel piercings, avoid
+                  high-waisted garments that put pressure on the site.
+                </li>
+                <li>
+                  Grooming: Perform grooming (e.g., haircut, hair color, eyebrow plucking) at least
+                  2 days prior. Such practices should not be performed for roughly 2 months after
+                  the piercing.
+                </li>
               </ul>
             </li>
-            <li> <strong>Health and Safety</strong>
+            <li>
+              <strong>Health and Safety</strong>
               <ul class="pl-3">
-                <li>Pre-Piercing Research: Research the specific piercing, procedure, healing process,
-                  and
-                  potential complications such as migration, rejection, scarring, or keloids. Understand that a piercing
-                  is
-                  an open wound.</li>
-                <li>Health Disclosure: Inform me of any medical conditions, medications, or allergies
-                  (latex/metal). Research your family history regarding keloids and discuss it with me.</li>
-                <li>Pregnancy: Do not get pierced if you are pregnant. The immune system is often too
-                  weak
-                  during pregnancy to effectively fight potential infections.</li>
+                <li>
+                  Pre-Piercing Research: Research the specific piercing, procedure, healing process,
+                  and potential complications such as migration, rejection, scarring, or keloids.
+                  Understand that a piercing is an open wound.
+                </li>
+                <li>
+                  Health Disclosure: Inform me of any medical conditions, medications, or allergies
+                  (latex/metal). Research your family history regarding keloids and discuss it with
+                  me.
+                </li>
+                <li>
+                  Pregnancy: Do not get pierced if you are pregnant. The immune system is often too
+                  weak during pregnancy to effectively fight potential infections.
+                </li>
               </ul>
             </li>
-            <li> <strong>Anatomical Assessment</strong>
+            <li>
+              <strong>Anatomical Assessment</strong>
               <ul class="pl-3">
-                <li>Certain piercings require an anatomical assessment. Be prepared to provide photos if requested to
-                  determine suitability.</li>
-                <li>Not all piercings are suitable for every individual. I reserve the right to refuse any piercing if
-                  I believe it is unsafe or unsuitable.</li>
+                <li>
+                  Certain piercings require an anatomical assessment. Be prepared to provide photos
+                  if requested to determine suitability.
+                </li>
+                <li>
+                  Not all piercings are suitable for every individual. I reserve the right to refuse
+                  any piercing if I believe it is unsafe or unsuitable.
+                </li>
               </ul>
             </li>
-            <li> <strong>Substance Restrictions</strong>
+            <li>
+              <strong>Substance Restrictions</strong>
               <ul class="pl-3">
-                <li>Do not consume alcohol or drugs before your appointment, as they affect blood clotting. Do not
-                  consume
-                  alcohol within 12 hours before or after your appointment. Do not come on an empty stomach; please eat
-                  a
-                  meal beforehand.</li>
+                <li>
+                  Do not consume alcohol or drugs before your appointment, as they affect blood
+                  clotting. Do not consume alcohol within 12 hours before or after your appointment.
+                  Do not come on an empty stomach; please eat a meal beforehand.
+                </li>
               </ul>
             </li>
-            <li> <strong>Medical Intervention</strong>
+            <li>
+              <strong>Medical Intervention</strong>
               <ul class="pl-3">
-                <li>Severe complications like infections or keloids may require professional medical advice. Understand
-                  that
-                  irritation bumps are part of the healing process, whereas keloids tend to be genetic.</li>
+                <li>
+                  Severe complications like infections or keloids may require professional medical
+                  advice. Understand that irritation bumps are part of the healing process, whereas
+                  keloids tend to be genetic.
+                </li>
               </ul>
             </li>
-            <li> <strong>Hygiene and Safety Protocols</strong>
+            <li>
+              <strong>Hygiene and Safety Protocols</strong>
               <ul class="pl-3">
-                <li>I adhere to strict hygiene and safety protocols. You are welcome to ask questions regarding my
-                  practices
-                  or inspect my hygiene measures.</li>
-
+                <li>
+                  I adhere to strict hygiene and safety protocols. You are welcome to ask questions
+                  regarding my practices or inspect my hygiene measures.
+                </li>
               </ul>
             </li>
-            <li> <strong>Piercing Limitations</strong>
+            <li>
+              <strong>Piercing Limitations</strong>
               <ul class="pl-3">
-                <li>A maximum of 3 piercings will be performed in one sitting per person. For ear cartilage, only one
-                  ear
-                  will be
-                  pierced per sitting. Wait at least 2 months before piercing the other ear.</li>
-
+                <li>
+                  A maximum of 3 piercings will be performed in one sitting per person. For ear
+                  cartilage, only one ear will be pierced per sitting. Wait at least 2 months before
+                  piercing the other ear.
+                </li>
               </ul>
             </li>
-            <li> <strong>Jewelry</strong>
+            <li>
+              <strong>Jewelry</strong>
               <ul class="pl-3">
-                <li>Piercing rates include basic implant-grade titanium jewelry. Decorative options are available in the
-                  Jewellery Gallery for an additional fee (including floating navel upgrades).
-                  Please select your jewelry prior to your appointment to allow for sterilization.
-                  <div><strong><em>Note: </em></strong> Initial jewelry must not be removed for a minimum of 2 months.
+                <li>
+                  Piercing rates include basic implant-grade titanium jewelry. Decorative options
+                  are available in the Jewellery Gallery for an additional fee (including floating
+                  navel upgrades). Please select your jewelry prior to your appointment to allow for
+                  sterilization.
+                  <div>
+                    <strong><em>Note: </em></strong> Initial jewelry must not be removed for a
+                    minimum of 2 months.
                   </div>
                 </li>
               </ul>
             </li>
-            <li> <strong>Aftercare Commitment</strong>
+            <li>
+              <strong>Aftercare Commitment</strong>
               <ul class="pl-3">
-                <li>Proper aftercare is your sole responsibility. Understand that jewelry acts as a foreign body and a
-                  medium for contaminants. Healing takes time.</li>
-
+                <li>
+                  Proper aftercare is your sole responsibility. Understand that jewelry acts as a
+                  foreign body and a medium for contaminants. Healing takes time.
+                </li>
               </ul>
             </li>
-            <li> <strong>Gallery Contribution</strong>
+            <li>
+              <strong>Gallery Contribution</strong>
               <ul class="pl-3">
-                <li>You are expected to provide clear, self-taken photos of your healing piercing for my gallery.</li>
-
+                <li>
+                  You are expected to provide clear, self-taken photos of your healing piercing for
+                  my gallery.
+                </li>
               </ul>
             </li>
-            <li> <strong>Travel and Lifestyle</strong>
+            <li>
+              <strong>Travel and Lifestyle</strong>
               <ul class="pl-3">
-                <li>Plan your appointment only if you have no travel plans and do not intend to visit pools or beaches
-                  within
-                  the next
-                  month. Travel can introduce additional bacteria and make consistent aftercare difficult.</li>
-
+                <li>
+                  Plan your appointment only if you have no travel plans and do not intend to visit
+                  pools or beaches within the next month. Travel can introduce additional bacteria
+                  and make consistent aftercare difficult.
+                </li>
               </ul>
             </li>
-            <li> <strong>Piercer Fallibility</strong>
+            <li>
+              <strong>Piercer Fallibility</strong>
               <ul class="pl-3">
-                <li>Piercers are human and capable of making mistakes. If a piercing is placed incorrectly or at a
-                  suboptimal angle, I will assess the situation and may offer to re-pierce the area to correct the
-                  error.
+                <li>
+                  Piercers are human and capable of making mistakes. If a piercing is placed
+                  incorrectly or at a suboptimal angle, I will assess the situation and may offer to
+                  re-pierce the area to correct the error.
                 </li>
               </ul>
             </li>
@@ -317,10 +516,7 @@
         <v-card-actions class="px-0 mt-6">
           <v-btn variant="text" @click="closeTerms" class="text-none">Go Back</v-btn>
           <v-spacer />
-          <v-btn class="active-item-btn px-6 submit-btn" style="background: #8b76a2 !important; color: white !important"
-            @click="confirmTerms">
-            I Accept
-          </v-btn>
+          <v-btn class="active-item-btn px-6 submit-btn" @click="confirmTerms"> I Accept </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -330,7 +526,16 @@
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted } from 'vue'
 import { db } from '../firebase'
-import { collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, doc, writeBatch } from 'firebase/firestore'
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  writeBatch,
+} from 'firebase/firestore'
 
 const formRef = ref<any>(null)
 const valid = ref(false)
@@ -341,6 +546,15 @@ const showTermsError = ref(false)
 const dateMenu = ref(false)
 const todayDate = new Date()
 const appointments = ref<any[]>([])
+const anatomyDialog = ref(false)
+const hasSeenAnatomyWarning = ref(false)
+const unavailableDates = ref([
+  // '2026-02-16',
+  // '2026-02-17',
+  // '2026-02-18',
+  // '2026-02-19',
+  // '2026-02-20',
+])
 
 const maxDate = computed(() => {
   const d = new Date()
@@ -407,8 +621,23 @@ const getPersonTotal = (pIndex: number) => {
 }
 
 const grandTotal = computed(() => {
-  return (booking.piercees || []).reduce((sum, _, index) => sum + (getPersonTotal(index) || 0), 0);
+  return (booking.piercees || []).reduce((sum, _, index) => sum + (getPersonTotal(index) || 0), 0)
 })
+
+const formatName = (val: string) => {
+  if (!val) return ''
+  return val
+    .toLowerCase()
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
+const formatEmail = () => {
+  if (booking.email) {
+    booking.email = booking.email.toLowerCase().trim()
+  }
+}
 
 const formattedDisplayDate = computed(() => {
   if (!booking.date) return ''
@@ -424,22 +653,24 @@ const formattedDisplayDate = computed(() => {
 })
 
 const getTotalWeight = (pIndex: number) => {
-  return booking.piercees?.[pIndex]?.selections.reduce((sum, sel) => sum + (sel.isPair ? 2 : 1), 0) ?? 0;
+  return (
+    booking.piercees?.[pIndex]?.selections.reduce((sum, sel) => sum + (sel.isPair ? 2 : 1), 0) ?? 0
+  )
 }
 
 const addPiercingField = (pIndex: number) => {
   if (getTotalWeight(pIndex) < 3) {
-    const piercee = booking.piercees?.[pIndex];
+    const piercee = booking.piercees?.[pIndex]
     if (piercee) {
-      piercee.selections.push({ piercing: null, isPair: false });
+      piercee.selections.push({ piercing: null, isPair: false })
     }
   }
 }
 
 const removePiercingField = (pIndex: number, sIndex: number) => {
-  const piercee = booking.piercees?.[pIndex];
+  const piercee = booking.piercees?.[pIndex]
   if (piercee) {
-    piercee.selections.splice(sIndex, 1);
+    piercee.selections.splice(sIndex, 1)
   }
 }
 
@@ -463,170 +694,182 @@ const onDateSelected = () => {
 
 // Helper to get taken slots for the currently selected date
 const takenSlotsForSelectedDate = computed(() => {
-  if (!booking.date) return [];
-  const selectedDateStr = new Date(booking.date).toDateString();
+  if (!booking.date) return []
+  const selectedDateStr = new Date(booking.date).toDateString()
 
   return appointments.value
-    .filter(app => {
-      const appDate = app.date?.seconds
-        ? new Date(app.date.seconds * 1000)
-        : new Date(app.date);
-      return appDate.toDateString() === selectedDateStr;
+    .filter((app) => {
+      const appDate = app.date?.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date)
+      return appDate.toDateString() === selectedDateStr
     })
-    .map(app => app.slot);
-});
+    .map((app) => app.slot)
+})
 
 const availableSlots = computed(() => {
-  if (!booking.date) return [];
-  const d = new Date(booking.date);
-  const dayOfWeek = d.getDay();
+  if (!booking.date) return []
+  const d = new Date(booking.date)
+  const dayOfWeek = d.getDay()
 
-  if (dayOfWeek === 1) return ['Closed on Mondays'];
+  if (dayOfWeek === 1) return ['Closed on Mondays']
 
-  const taken = takenSlotsForSelectedDate.value;
-  const totalBooked = getDailyTotal(booking.date);
-  const isRestrictedWeekday = [2, 3, 4, 5].includes(dayOfWeek);
-  const isWeekend = [0, 6].includes(dayOfWeek);
+  const taken = takenSlotsForSelectedDate.value
+  const totalBooked = getDailyTotal(booking.date)
+  const isRestrictedWeekday = [2, 3, 4, 5].includes(dayOfWeek)
+  const isWeekend = [0, 6].includes(dayOfWeek)
 
   // --- TUE, WED, THU, FRI LOGIC ---
   if (isRestrictedWeekday) {
     if (booking.count === 1) {
-      return (totalBooked >= 1 || taken.includes('4:00pm-6:00pm')) ? [] : ['4:00pm-6:00pm'];
+      return totalBooked >= 1 || taken.includes('4:00pm-6:00pm') ? [] : ['4:00pm-6:00pm']
     }
-    return [];
+    return []
   }
 
   // --- SAT & SUN LOGIC ---
   if (isWeekend) {
     // 3 PERSONS: 1:00pm-5:00pm only if day is totally empty
     if (booking.count === 3) {
-      return (totalBooked === 0) ? ['1:00pm-5:00pm'] : [];
+      return totalBooked === 0 ? ['1:00pm-5:00pm'] : []
     }
 
     // 2 PERSONS
     if (booking.count === 2) {
-      if (taken.includes('1:00pm-5:00pm') || taken.includes('2:00pm-4:00pm')) return [];
+      if (taken.includes('1:00pm-5:00pm') || taken.includes('2:00pm-4:00pm')) return []
 
-      let options = ['12:00pm-3:00pm', '3:00pm-6:00pm'];
-      return options.filter(slot => {
-        if (taken.includes(slot)) return false;
+      let options = ['12:00pm-3:00pm', '3:00pm-6:00pm']
+      return options.filter((slot) => {
+        if (taken.includes(slot)) return false
         if (slot === '12:00pm-3:00pm') {
           // Available if nothing blocks the 12-3pm range
-          return !taken.includes('12:00pm-2:00pm') && !taken.includes('2:00pm-4:00pm');
+          return !taken.includes('12:00pm-2:00pm') && !taken.includes('2:00pm-4:00pm')
         }
         if (slot === '3:00pm-6:00pm') {
           // Available if nothing blocks the 3-6pm range
-          return !taken.includes('4:00pm-6:00pm') && !taken.includes('2:00pm-4:00pm');
+          return !taken.includes('4:00pm-6:00pm') && !taken.includes('2:00pm-4:00pm')
         }
-        return true;
-      });
+        return true
+      })
     }
 
     // 1 PERSON
     if (booking.count === 1) {
-      if (taken.includes('1:00pm-5:00pm') || totalBooked >= 3) return [];
+      if (taken.includes('1:00pm-5:00pm') || totalBooked >= 3) return []
 
-      let options = ['12:00pm-2:00pm', '2:00pm-4:00pm', '4:00pm-6:00pm'];
-      return options.filter(slot => {
-        if (taken.includes(slot)) return false;
+      let options = ['12:00pm-2:00pm', '2:00pm-4:00pm', '4:00pm-6:00pm']
+      return options.filter((slot) => {
+        if (taken.includes(slot)) return false
 
         // Blocking based on 2-person (3hr) slots
-        if (taken.includes('12:00pm-3:00pm') && slot !== '4:00pm-6:00pm') return false;
-        if (taken.includes('3:00pm-6:00pm') && slot !== '12:00pm-2:00pm') return false;
+        if (taken.includes('12:00pm-3:00pm') && slot !== '4:00pm-6:00pm') return false
+        if (taken.includes('3:00pm-6:00pm') && slot !== '12:00pm-2:00pm') return false
 
-        return true;
-      });
+        return true
+      })
     }
   }
-  return [];
-});
+  return []
+})
 
 // 1. Function to get total piercees for a specific date
 const getDailyTotal = (date: any) => {
-  const dateString = new Date(date).toDateString();
+  const dateString = new Date(date).toDateString()
   return appointments.value.reduce((sum, app) => {
-    if (!app.date) return sum;
-    const appDate = app.date.seconds
-      ? new Date(app.date.seconds * 1000)
-      : new Date(app.date);
+    if (!app.date) return sum
+    const appDate = app.date.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date)
 
-    return appDate.toDateString() === dateString
-      ? sum + (Number(app.count) || 0)
-      : sum;
-  }, 0);
-};
+    return appDate.toDateString() === dateString ? sum + (Number(app.count) || 0) : sum
+  }, 0)
+}
 
 const isDateAvailable = (date: any) => {
-  const d = new Date(date);
-  const now = new Date();
+  const d = new Date(date)
 
-  // --- NEW LOGIC: Disable today if it's past 4 PM ---
-  const isToday = d.toDateString() === now.toDateString();
-  if (isToday && now.getHours() >= 16) {
-    return false;
+  // 1. FORMAT FOR UNAVAILABLE ARRAY (YYYY-MM-DD)
+  const yyyymmdd =
+    d.getFullYear() +
+    '-' +
+    String(d.getMonth() + 1).padStart(2, '0') +
+    '-' +
+    String(d.getDate()).padStart(2, '0')
+
+  if (unavailableDates.value.includes(yyyymmdd)) {
+    return false
   }
 
-  const dayOfWeek = d.getDay();
-  if (dayOfWeek === 1) return false; // Monday check
+  const now = new Date()
 
-  const dateString = d.toDateString();
-  const dayApps = appointments.value.filter(app => {
-    const appDate = app.date?.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date);
-    return appDate.toDateString() === dateString;
-  });
+  // 2. DISABLE TODAY AFTER 4 PM
+  const isToday = d.toDateString() === now.toDateString()
+  if (isToday && now.getHours() >= 16) {
+    return false
+  }
 
-  const takenSlots = dayApps.map(a => a.slot);
-  const totalPiercees = dayApps.reduce((sum, a) => sum + (Number(a.count) || 0), 0);
-  const isWeekend = [0, 6].includes(dayOfWeek);
+  // 3. MONDAY CHECK
+  const dayOfWeek = d.getDay()
+  if (dayOfWeek === 1) return false
 
-  // --- RULE: ALWAYS DISABLE IF 3+ PIERCEES (Unless weekend 2+2 exception) ---
+  // 4. FIREBASE APPOINTMENTS CHECK
+  // Renamed this variable to avoid the "Redeclare" error
+  const comparisonDateString = d.toDateString()
+  const dayApps = appointments.value.filter((app) => {
+    const appDate = app.date?.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date)
+    return appDate.toDateString() === comparisonDateString
+  })
+
+  const takenSlots = dayApps.map((a) => a.slot)
+  const totalPiercees = dayApps.reduce((sum, a) => sum + (Number(a.count) || 0), 0)
+  const isWeekend = [0, 6].includes(dayOfWeek)
+
+  // --- CAPACITY RULES ---
+
+  // RULE: ALWAYS DISABLE IF 3+ PIERCEES (Unless weekend 2+2 exception)
   if (totalPiercees >= 3) {
     if (isWeekend && booking.count === 2 && totalPiercees === 2) {
-      // If one 2-person slot is taken, the other might be free
-      const hasOneTwoPersonSlot = takenSlots.includes('12:00pm-3:00pm') || takenSlots.includes('3:00pm-6:00pm');
-      if (hasOneTwoPersonSlot && !takenSlots.includes('2:00pm-4:00pm')) return true;
+      const hasOneTwoPersonSlot =
+        takenSlots.includes('12:00pm-3:00pm') || takenSlots.includes('3:00pm-6:00pm')
+      if (hasOneTwoPersonSlot && !takenSlots.includes('2:00pm-4:00pm')) return true
     }
-    return false;
+    return false
   }
 
-  // --- TUE-FRI: Only 1 person, 1 slot ---
+  // TUE-FRI: Only 1 person, 1 slot total
   if ([2, 3, 4, 5].includes(dayOfWeek)) {
-    return booking.count === 1 && totalPiercees === 0;
+    return booking.count === 1 && totalPiercees === 0
   }
 
-  // --- WEEKEND CAPACITY CHECK ---
+  // WEEKEND CAPACITY CHECK
   if (isWeekend) {
-    if (booking.count === 3) return totalPiercees === 0;
-    if (takenSlots.includes('1:00pm-5:00pm')) return false;
+    if (booking.count === 3) return totalPiercees === 0
+    if (takenSlots.includes('1:00pm-5:00pm')) return false
 
     // If middle slot (2-4pm) is taken, no multi-person slots are possible
-    if (takenSlots.includes('2:00pm-4:00pm') && booking.count > 1) return false;
+    if (takenSlots.includes('2:00pm-4:00pm') && booking.count > 1) return false
   }
 
-  return true;
-};
+  return true
+}
 
 // 3. Function for event-color
 const getEventColor = (date: any) => {
-  const d = new Date(date);
-  const dayApps = appointments.value.filter(app => {
-    const appDate = app.date?.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date);
-    return appDate.toDateString() === d.toDateString();
-  });
+  const d = new Date(date)
+  const dayApps = appointments.value.filter((app) => {
+    const appDate = app.date?.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date)
+    return appDate.toDateString() === d.toDateString()
+  })
 
-  const total = dayApps.reduce((sum, a) => sum + (Number(a.count) || 0), 0);
-  const hasThreePersonSlot = dayApps.some(a => a.slot === '1:00pm-5:00pm');
+  const total = dayApps.reduce((sum, a) => sum + (Number(a.count) || 0), 0)
+  const hasThreePersonSlot = dayApps.some((a) => a.slot === '1:00pm-5:00pm')
 
   // RED if completely full (3 people or the 3-person specific block)
   // Note: 2+2 weekend scenario is also "Full"
-  if (hasThreePersonSlot || total >= 3 || (total === 4)) return 'red';
+  if (hasThreePersonSlot || total >= 3 || total === 4) return 'red'
 
   // ORANGE if partially booked
-  if (total > 1) return 'orange';
+  if (total > 1) return 'orange'
 
   // GREEN if empty
-  if (total == 1) return 'green';
-};
+  if (total == 1) return 'green'
+}
 
 const formReady = computed(() => {
   const slotValid = booking.slot && !booking.slot.includes('Closed')
@@ -645,38 +888,41 @@ const closeTerms = () => {
 }
 
 const submitForm = async () => {
+  booking.name = formatName(booking.name)
+  booking.email = booking.email.toLowerCase().trim()
+  booking.piercees.forEach((p) => (p.name = formatName(p.name)))
   const { valid: isFormValid } = await formRef.value.validate()
   if (!isFormValid) return
 
   if (!termsConfirmed.value) {
-    showTermsError.value = true;
-    termsDialog.value = true;
+    showTermsError.value = true
+    termsDialog.value = true
     return
   }
 
   try {
     // Save to Firebase
-    await addDoc(collection(db, "appointments"), {
+    await addDoc(collection(db, 'appointments'), {
       ...booking,
-      createdAt: serverTimestamp() // Adds a timestamp for sorting
-    });
+      createdAt: serverTimestamp(), // Adds a timestamp for sorting
+    })
 
-    submitted.value = true;
+    submitted.value = true
 
     setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 100);
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }, 100)
   } catch (e) {
-    console.error("Error adding document: ", e);
-    alert("Failed to save booking. Please try again.");
+    console.error('Error adding document: ', e)
+    alert('Failed to save booking. Please try again.')
   }
 }
 
 const reportingTime = computed(() => {
-  if (!booking.slot) return '';
+  if (!booking.slot) return ''
 
   // Extract the start time (e.g., "12:00pm" from "12:00pm-2:00pm")
-  const startTime = (booking.slot || "").split('-')[0]?.trim() || "";
+  const startTime = (booking.slot || '').split('-')[0]?.trim() || ''
 
   // Map specific start times to their reporting windows
   const timeMap: Record<string, string> = {
@@ -684,51 +930,58 @@ const reportingTime = computed(() => {
     '1:00pm': '1:00pm - 1:30pm',
     '2:00pm': '2:00pm - 2:30pm',
     '3:00pm': '3:00pm - 3:30pm',
-    '4:00pm': '4:00pm - 4:30pm'
-  };
+    '4:00pm': '4:00pm - 4:30pm',
+  }
 
-  return timeMap[startTime] || startTime;
-});
+  return timeMap[startTime] || startTime
+})
+
+const checkAnatomyRequirement = (val: any) => {
+  // If the user selected something and hasn't seen the warning this session
+  if (val && !hasSeenAnatomyWarning.value) {
+    anatomyDialog.value = true
+    hasSeenAnatomyWarning.value = true
+  }
+}
 
 const cleanupPastAppointments = async () => {
   // Get today's date at the very start of the day (00:00:00)
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
   // Filter local appointments that have already loaded
   // or run a specific query to find old ones
-  const pastAppointments = appointments.value.filter(app => {
-    const appDate = app.date.toDate ? app.date.toDate() : new Date(app.date);
-    return appDate < today;
-  });
+  const pastAppointments = appointments.value.filter((app) => {
+    const appDate = app.date.toDate ? app.date.toDate() : new Date(app.date)
+    return appDate < today
+  })
 
-  if (pastAppointments.length === 0) return;
+  if (pastAppointments.length === 0) return
 
   // Use a Batch to delete multiple documents at once for efficiency
-  const batch = writeBatch(db);
+  const batch = writeBatch(db)
   pastAppointments.forEach((app) => {
-    const docRef = doc(db, "appointments", app.id);
-    batch.delete(docRef);
-  });
+    const docRef = doc(db, 'appointments', app.id)
+    batch.delete(docRef)
+  })
 
   try {
-    await batch.commit();
-    console.log(`${pastAppointments.length} old appointments cleared.`);
+    await batch.commit()
+    console.log(`${pastAppointments.length} old appointments cleared.`)
   } catch (e) {
-    console.error("Error cleaning up old appointments:", e);
+    console.error('Error cleaning up old appointments:', e)
   }
-};
+}
 
 onMounted(() => {
-  const q = query(collection(db, "appointments"), orderBy("createdAt", "desc"));
+  const q = query(collection(db, 'appointments'), orderBy('createdAt', 'desc'))
 
   onSnapshot(q, (snapshot) => {
-    appointments.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    appointments.value = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
 
-    cleanupPastAppointments();
-  });
+    cleanupPastAppointments()
+  })
 })
-
 </script>
 
 <style scoped>
@@ -780,7 +1033,7 @@ onMounted(() => {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
   z-index: 2;
   backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important
+  -webkit-backdrop-filter: none !important;
 }
 
 .menu-title {
@@ -959,6 +1212,6 @@ onMounted(() => {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
   z-index: 2;
   backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important
+  -webkit-backdrop-filter: none !important;
 }
 </style>
