@@ -253,7 +253,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
   z-index: 2;
   backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important
+  -webkit-backdrop-filter: none !important;
 }
 
 .section-title {

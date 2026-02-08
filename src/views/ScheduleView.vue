@@ -548,7 +548,7 @@ const todayDate = new Date()
 const appointments = ref<any[]>([])
 const anatomyDialog = ref(false)
 const hasSeenAnatomyWarning = ref(false)
-const unavailableDates = ref([
+const unavailableDates = ref<string[]>([
   // '2026-02-16',
   // '2026-02-17',
   // '2026-02-18',
@@ -869,6 +869,8 @@ const getEventColor = (date: any) => {
 
   // GREEN if empty
   if (total == 1) return 'green'
+
+  return ''
 }
 
 const formReady = computed(() => {

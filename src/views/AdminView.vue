@@ -56,7 +56,7 @@
                     <div class="text-caption pl-6 text-grey-darken-2">
                       {{
                         p.selections
-                          .map((s) => `${s.piercing.label}${s.isPair ? ' (Pair)' : ''}`)
+                          .map((s: any) => `${s.piercing.label}${s.isPair ? ' (Pair)' : ''}`)
                           .join(', ')
                       }}
                     </div>

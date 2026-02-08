@@ -37,7 +37,7 @@
               class="gallery-thumb loading-blur"
               loading="lazy"
               @click="open(index)"
-              @load="(e) => e.target.closest('.v-img').classList.remove('loading-blur')"
+              @load="($event) => onImgLoad($event)"
             >
               <template v-slot:placeholder>
                 <div class="placeholder-skeleton"></div>
@@ -130,15 +130,48 @@ onMounted(async () => {
 
   const resolvedImages = await Promise.all(
     validPaths.map(async (path) => {
-      const mod = await modules[path]()
-      return {
-        url: mod.default,
-        name: path.split('/').pop()?.toLowerCase() || '',
+      // 1. Get the loader function
+      const loader = modules[path]
+
+      // 2. Guard: Check if it exists and is a function
+      if (typeof loader === 'function') {
+        try {
+          const mod = (await loader()) as { default: string }
+          return {
+            url: mod.default,
+            name: path.split('/').pop()?.toLowerCase() || '',
+          }
+        } catch (err) {
+          console.error(`Error loading image at ${path}:`, err)
+        }
       }
+      return null // Return null for failed loads
     })
   )
-  allImages.value = resolvedImages
+
+  // 3. Filter out any null values from failed loads
+  allImages.value = resolvedImages.filter(
+    (img): img is { url: string; name: string } => img !== null
+  )
 })
+
+// Add 'undefined' to the type and a null-check guard
+const onImgLoad = (e: Event | string | undefined) => {
+  // 1. Guard: If e is undefined or null, exit early
+  if (!e) return
+
+  // 2. Check if it's a string (Vuetify sometimes passes the src URL)
+  if (typeof e === 'string') return
+
+  // 3. Handle the DOM manipulation safely
+  const target = e.target as HTMLElement | null
+  if (target) {
+    const el = target.closest('.v-img')
+    if (el) {
+      el.classList.remove('loading-blur')
+    }
+  }
+}
 
 const filteredImagesList = computed(() => {
   if (!selectedFilter.value) return allImages.value
