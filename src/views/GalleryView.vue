@@ -110,6 +110,8 @@ const filterTags = [
   'bridge',
   'tongue',
   'nipple',
+  'clicker',
+  'ring',
 ]
 
 interface GalleryImage {

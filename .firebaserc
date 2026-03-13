@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "pokes-on-you-website-36e50"
-  }
+  },
+  "targets": {
+    "pokes-on-you-website-36e50": {
+      "hosting": {
+        "prod": [
+          "pokesonyou"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
