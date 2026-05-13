@@ -549,6 +549,7 @@ const appointments = ref<any[]>([])
 const anatomyDialog = ref(false)
 const hasSeenAnatomyWarning = ref(false)
 const unavailableDates = ref<string[]>([
+  // '2026-05-15',
   // '2026-02-16',
   // '2026-02-17',
   // '2026-02-18',
@@ -633,11 +634,55 @@ const formatName = (val: string) => {
     .join(' ')
 }
 
-const formatEmail = () => {
-  if (booking.email) {
-    booking.email = booking.email.toLowerCase().trim()
-  }
+const weekday1pSlots = ['3:00pm-4:30pm', '4:30pm-6:00pm']
+const weekday2pSlots = ['3:00pm-6:00pm']
+const weekend1pSlots = ['12:00pm-1:30pm', '1:30pm-3:00pm', '3:00pm-4:30pm', '4:30pm-6:00pm']
+const weekend2pSlots = ['12:00pm-3:00pm', '1:30pm-4:30pm', '3:00pm-6:00pm']
+const weekend3pSlots = ['12:00pm-4:30pm', '1:30pm-6:00pm']
+
+const slotDependencies: Record<string, string[]> = {
+  // Weekday 2p
+  '3:00pm-6:00pm': ['3:00pm-4:30pm', '4:30pm-6:00pm'],
+  // Weekend 2p
+  '12:00pm-3:00pm': ['12:00pm-1:30pm', '1:30pm-3:00pm'],
+  '1:30pm-4:30pm': ['1:30pm-3:00pm', '3:00pm-4:30pm'],
+  // Weekend 3p
+  '12:00pm-4:30pm': ['12:00pm-1:30pm', '1:30pm-3:00pm', '3:00pm-4:30pm'],
+  '1:30pm-6:00pm': ['1:30pm-3:00pm', '3:00pm-4:30pm', '4:30pm-6:00pm'],
 }
+
+const weekdayBlockers: Record<string, string[]> = {
+  '3:00pm-4:30pm': ['3:00pm-6:00pm'],
+  '4:30pm-6:00pm': ['3:00pm-6:00pm'],
+  '3:00pm-6:00pm': ['3:00pm-4:30pm', '4:30pm-6:00pm'],
+}
+
+const weekendBlockers: Record<string, string[]> = {
+  // 1p slots block 2p/3p
+  '12:00pm-1:30pm': ['12:00pm-3:00pm', '12:00pm-4:30pm'],
+  '1:30pm-3:00pm': ['12:00pm-3:00pm', '1:30pm-4:30pm', '12:00pm-4:30pm', '1:30pm-6:00pm'],
+  '3:00pm-4:30pm': ['1:30pm-4:30pm', '3:00pm-6:00pm', '12:00pm-4:30pm', '1:30pm-6:00pm'],
+  '4:30pm-6:00pm': ['3:00pm-6:00pm', '1:30pm-6:00pm'],
+  // 2p slots block 1p and conflicting 2p/3p
+  '12:00pm-3:00pm': ['12:00pm-1:30pm', '1:30pm-3:00pm', '1:30pm-4:30pm', '12:00pm-4:30pm', '1:30pm-6:00pm'],
+  '1:30pm-4:30pm': ['1:30pm-3:00pm', '3:00pm-4:30pm', '12:00pm-3:00pm', '3:00pm-6:00pm', '12:00pm-4:30pm', '1:30pm-6:00pm'],
+  '3:00pm-6:00pm': ['3:00pm-4:30pm', '4:30pm-6:00pm', '1:30pm-4:30pm', '12:00pm-4:30pm', '1:30pm-6:00pm'],
+  // 3p slots block 1p and 2p
+  '12:00pm-4:30pm': ['12:00pm-1:30pm', '1:30pm-3:00pm', '3:00pm-4:30pm', '12:00pm-3:00pm', '1:30pm-4:30pm', '3:00pm-6:00pm', '1:30pm-6:00pm'],
+  '1:30pm-6:00pm': ['12:00pm-3:00pm', '1:30pm-3:00pm', '3:00pm-4:30pm', '4:30pm-6:00pm', '1:30pm-4:30pm', '3:00pm-6:00pm', '12:00pm-4:30pm'],
+}
+
+const isSlotAvailable = (slot: string, taken: Set<string>, dayOfWeek: number) => {
+  if (taken.has(slot)) return false
+  const deps = slotDependencies[slot] || []
+  if (!deps.every(dep => !taken.has(dep))) return false
+
+  // Use appropriate blockers based on day type
+  const blockers = ([2, 3, 4, 5].includes(dayOfWeek) ? weekdayBlockers : weekendBlockers)[slot] || []
+  if (blockers.some(blocker => taken.has(blocker))) return false
+  return true
+}
+
 
 const formattedDisplayDate = computed(() => {
   if (!booking.date) return ''
@@ -709,65 +754,30 @@ const availableSlots = computed(() => {
   if (!booking.date) return []
   const d = new Date(booking.date)
   const dayOfWeek = d.getDay()
-
   if (dayOfWeek === 1) return ['Closed on Mondays']
 
-  const taken = takenSlotsForSelectedDate.value
-  const totalBooked = getDailyTotal(booking.date)
-  const isRestrictedWeekday = [2, 3, 4, 5].includes(dayOfWeek)
-  const isWeekend = [0, 6].includes(dayOfWeek)
+  const taken = new Set(takenSlotsForSelectedDate.value)
 
-  // --- TUE, WED, THU, FRI LOGIC ---
-  if (isRestrictedWeekday) {
+  let possibleSlots: string[] = []
+  if ([2, 3, 4, 5].includes(dayOfWeek)) {
+    // weekdays
     if (booking.count === 1) {
-      return totalBooked >= 1 || taken.includes('4:00pm-6:00pm') ? [] : ['4:00pm-6:00pm']
+      possibleSlots = weekday1pSlots
+    } else if (booking.count === 2) {
+      possibleSlots = weekday2pSlots
     }
-    return []
+  } else if ([0, 6].includes(dayOfWeek)) {
+    // weekends
+    if (booking.count === 1) {
+      possibleSlots = weekend1pSlots
+    } else if (booking.count === 2) {
+      possibleSlots = weekend2pSlots
+    } else if (booking.count === 3) {
+      possibleSlots = weekend3pSlots
+    }
   }
 
-  // --- SAT & SUN LOGIC ---
-  if (isWeekend) {
-    // 3 PERSONS: 1:00pm-5:00pm only if day is totally empty
-    if (booking.count === 3) {
-      return totalBooked === 0 ? ['1:00pm-5:00pm'] : []
-    }
-
-    // 2 PERSONS
-    if (booking.count === 2) {
-      if (taken.includes('1:00pm-5:00pm') || taken.includes('2:00pm-4:00pm')) return []
-
-      let options = ['12:00pm-3:00pm', '3:00pm-6:00pm']
-      return options.filter((slot) => {
-        if (taken.includes(slot)) return false
-        if (slot === '12:00pm-3:00pm') {
-          // Available if nothing blocks the 12-3pm range
-          return !taken.includes('12:00pm-2:00pm') && !taken.includes('2:00pm-4:00pm')
-        }
-        if (slot === '3:00pm-6:00pm') {
-          // Available if nothing blocks the 3-6pm range
-          return !taken.includes('4:00pm-6:00pm') && !taken.includes('2:00pm-4:00pm')
-        }
-        return true
-      })
-    }
-
-    // 1 PERSON
-    if (booking.count === 1) {
-      if (taken.includes('1:00pm-5:00pm') || totalBooked >= 3) return []
-
-      let options = ['12:00pm-2:00pm', '2:00pm-4:00pm', '4:00pm-6:00pm']
-      return options.filter((slot) => {
-        if (taken.includes(slot)) return false
-
-        // Blocking based on 2-person (3hr) slots
-        if (taken.includes('12:00pm-3:00pm') && slot !== '4:00pm-6:00pm') return false
-        if (taken.includes('3:00pm-6:00pm') && slot !== '12:00pm-2:00pm') return false
-
-        return true
-      })
-    }
-  }
-  return []
+  return possibleSlots.filter(slot => isSlotAvailable(slot, taken, dayOfWeek))
 })
 
 // 1. Function to get total piercees for a specific date
@@ -809,7 +819,6 @@ const isDateAvailable = (date: any) => {
   if (dayOfWeek === 1) return false
 
   // 4. FIREBASE APPOINTMENTS CHECK
-  // Renamed this variable to avoid the "Redeclare" error
   const comparisonDateString = d.toDateString()
   const dayApps = appointments.value.filter((app) => {
     const appDate = app.date?.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date)
@@ -817,58 +826,75 @@ const isDateAvailable = (date: any) => {
   })
 
   const takenSlots = dayApps.map((a) => a.slot)
-  const totalPiercees = dayApps.reduce((sum, a) => sum + (Number(a.count) || 0), 0)
-  const isWeekend = [0, 6].includes(dayOfWeek)
+  const taken = new Set(takenSlots)
 
-  // --- CAPACITY RULES ---
+  const daySlots = [
+    ...weekday1pSlots,
+    ...weekday2pSlots,
+    ...weekend1pSlots,
+    ...weekend2pSlots,
+    ...weekend3pSlots,
+  ]
 
-  // RULE: ALWAYS DISABLE IF 3+ PIERCEES (Unless weekend 2+2 exception)
-  if (totalPiercees >= 3) {
-    if (isWeekend && booking.count === 2 && totalPiercees === 2) {
-      const hasOneTwoPersonSlot =
-        takenSlots.includes('12:00pm-3:00pm') || takenSlots.includes('3:00pm-6:00pm')
-      if (hasOneTwoPersonSlot && !takenSlots.includes('2:00pm-4:00pm')) return true
-    }
+  const anySlotAvailableForDay = daySlots
+    .filter((slot) => {
+      if ([2, 3, 4, 5].includes(dayOfWeek) && !weekday1pSlots.includes(slot) && !weekday2pSlots.includes(slot)) {
+        return false
+      }
+      if ([0, 6].includes(dayOfWeek) && !weekend1pSlots.includes(slot) && !weekend2pSlots.includes(slot) && !weekend3pSlots.includes(slot)) {
+        return false
+      }
+      return true
+    })
+    .some((slot) => isSlotAvailable(slot, taken, dayOfWeek))
+
+  if (!anySlotAvailableForDay) {
     return false
   }
 
-  // TUE-FRI: Only 1 person, 1 slot total
+  // 5. CHECK IF ANY SLOT FOR CURRENT COUNT IS AVAILABLE
+  let possibleSlots: string[] = []
   if ([2, 3, 4, 5].includes(dayOfWeek)) {
-    return booking.count === 1 && totalPiercees === 0
+    // weekdays
+    if (booking.count === 1) {
+      possibleSlots = weekday1pSlots
+    } else if (booking.count === 2) {
+      possibleSlots = weekday2pSlots
+    }
+  } else if ([0, 6].includes(dayOfWeek)) {
+    // weekends
+    if (booking.count === 1) {
+      possibleSlots = weekend1pSlots
+    } else if (booking.count === 2) {
+      possibleSlots = weekend2pSlots
+    } else if (booking.count === 3) {
+      possibleSlots = weekend3pSlots
+    }
   }
 
-  // WEEKEND CAPACITY CHECK
-  if (isWeekend) {
-    if (booking.count === 3) return totalPiercees === 0
-    if (takenSlots.includes('1:00pm-5:00pm')) return false
-
-    // If middle slot (2-4pm) is taken, no multi-person slots are possible
-    if (takenSlots.includes('2:00pm-4:00pm') && booking.count > 1) return false
-  }
-
-  return true
+  const available = possibleSlots.some(slot => isSlotAvailable(slot, taken, dayOfWeek))
+  return available
 }
 
 // 3. Function for event-color
 const getEventColor = (date: any) => {
   const d = new Date(date)
+  const dayOfWeek = d.getDay()
   const dayApps = appointments.value.filter((app) => {
     const appDate = app.date?.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date)
     return appDate.toDateString() === d.toDateString()
   })
 
-  const total = dayApps.reduce((sum, a) => sum + (Number(a.count) || 0), 0)
-  const hasThreePersonSlot = dayApps.some((a) => a.slot === '1:00pm-5:00pm')
+  const totalPiercees = dayApps.reduce((sum, app) => sum + (Number(app.count) || 0), 0)
 
-  // RED if completely full (3 people or the 3-person specific block)
-  // Note: 2+2 weekend scenario is also "Full"
-  if (hasThreePersonSlot || total >= 3 || total === 4) return 'red'
-
-  // ORANGE if partially booked
-  if (total > 1) return 'orange'
-
-  // GREEN if empty
-  if (total == 1) return 'green'
+  if ([2, 3, 4, 5].includes(dayOfWeek)) {
+    if (totalPiercees === 1) return 'orange'
+    if (totalPiercees === 2) return 'red'
+  } else if ([0, 6].includes(dayOfWeek)) {
+    if (totalPiercees === 1 || totalPiercees === 2) return 'green'
+    if (totalPiercees === 3) return 'orange'
+    if (totalPiercees > 3) return 'red'
+  }
 
   return ''
 }
@@ -923,16 +949,15 @@ const submitForm = async () => {
 const reportingTime = computed(() => {
   if (!booking.slot) return ''
 
-  // Extract the start time (e.g., "12:00pm" from "12:00pm-2:00pm")
+  // Extract the start time (e.g., "12:00pm" from "12:00pm-1:30pm")
   const startTime = (booking.slot || '').split('-')[0]?.trim() || ''
 
   // Map specific start times to their reporting windows
   const timeMap: Record<string, string> = {
     '12:00pm': '12:00pm - 12:30pm',
-    '1:00pm': '1:00pm - 1:30pm',
-    '2:00pm': '2:00pm - 2:30pm',
+    '1:30pm': '1:30pm - 2:00pm',
     '3:00pm': '3:00pm - 3:30pm',
-    '4:00pm': '4:00pm - 4:30pm',
+    '4:30pm': '4:30pm - 5:00pm',
   }
 
   return timeMap[startTime] || startTime
