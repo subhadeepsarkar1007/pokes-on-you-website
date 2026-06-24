@@ -260,6 +260,10 @@
             >
               + Add Piercing
             </v-btn>
+
+            <div class="text-caption mt-6">
+              <em>*All prices include basic jewelry, based on the selected piercings*</em>
+            </div>
           </div>
 
           <div
@@ -664,25 +668,60 @@ const weekendBlockers: Record<string, string[]> = {
   '3:00pm-4:30pm': ['1:30pm-4:30pm', '3:00pm-6:00pm', '12:00pm-4:30pm', '1:30pm-6:00pm'],
   '4:30pm-6:00pm': ['3:00pm-6:00pm', '1:30pm-6:00pm'],
   // 2p slots block 1p and conflicting 2p/3p
-  '12:00pm-3:00pm': ['12:00pm-1:30pm', '1:30pm-3:00pm', '1:30pm-4:30pm', '12:00pm-4:30pm', '1:30pm-6:00pm'],
-  '1:30pm-4:30pm': ['1:30pm-3:00pm', '3:00pm-4:30pm', '12:00pm-3:00pm', '3:00pm-6:00pm', '12:00pm-4:30pm', '1:30pm-6:00pm'],
-  '3:00pm-6:00pm': ['3:00pm-4:30pm', '4:30pm-6:00pm', '1:30pm-4:30pm', '12:00pm-4:30pm', '1:30pm-6:00pm'],
+  '12:00pm-3:00pm': [
+    '12:00pm-1:30pm',
+    '1:30pm-3:00pm',
+    '1:30pm-4:30pm',
+    '12:00pm-4:30pm',
+    '1:30pm-6:00pm',
+  ],
+  '1:30pm-4:30pm': [
+    '1:30pm-3:00pm',
+    '3:00pm-4:30pm',
+    '12:00pm-3:00pm',
+    '3:00pm-6:00pm',
+    '12:00pm-4:30pm',
+    '1:30pm-6:00pm',
+  ],
+  '3:00pm-6:00pm': [
+    '3:00pm-4:30pm',
+    '4:30pm-6:00pm',
+    '1:30pm-4:30pm',
+    '12:00pm-4:30pm',
+    '1:30pm-6:00pm',
+  ],
   // 3p slots block 1p and 2p
-  '12:00pm-4:30pm': ['12:00pm-1:30pm', '1:30pm-3:00pm', '3:00pm-4:30pm', '12:00pm-3:00pm', '1:30pm-4:30pm', '3:00pm-6:00pm', '1:30pm-6:00pm'],
-  '1:30pm-6:00pm': ['12:00pm-3:00pm', '1:30pm-3:00pm', '3:00pm-4:30pm', '4:30pm-6:00pm', '1:30pm-4:30pm', '3:00pm-6:00pm', '12:00pm-4:30pm'],
+  '12:00pm-4:30pm': [
+    '12:00pm-1:30pm',
+    '1:30pm-3:00pm',
+    '3:00pm-4:30pm',
+    '12:00pm-3:00pm',
+    '1:30pm-4:30pm',
+    '3:00pm-6:00pm',
+    '1:30pm-6:00pm',
+  ],
+  '1:30pm-6:00pm': [
+    '12:00pm-3:00pm',
+    '1:30pm-3:00pm',
+    '3:00pm-4:30pm',
+    '4:30pm-6:00pm',
+    '1:30pm-4:30pm',
+    '3:00pm-6:00pm',
+    '12:00pm-4:30pm',
+  ],
 }
 
 const isSlotAvailable = (slot: string, taken: Set<string>, dayOfWeek: number) => {
   if (taken.has(slot)) return false
   const deps = slotDependencies[slot] || []
-  if (!deps.every(dep => !taken.has(dep))) return false
+  if (!deps.every((dep) => !taken.has(dep))) return false
 
   // Use appropriate blockers based on day type
-  const blockers = ([2, 3, 4, 5].includes(dayOfWeek) ? weekdayBlockers : weekendBlockers)[slot] || []
-  if (blockers.some(blocker => taken.has(blocker))) return false
+  const blockers =
+    ([2, 3, 4, 5].includes(dayOfWeek) ? weekdayBlockers : weekendBlockers)[slot] || []
+  if (blockers.some((blocker) => taken.has(blocker))) return false
   return true
 }
-
 
 const formattedDisplayDate = computed(() => {
   if (!booking.date) return ''
@@ -777,7 +816,7 @@ const availableSlots = computed(() => {
     }
   }
 
-  return possibleSlots.filter(slot => isSlotAvailable(slot, taken, dayOfWeek))
+  return possibleSlots.filter((slot) => isSlotAvailable(slot, taken, dayOfWeek))
 })
 
 // 1. Function to get total piercees for a specific date
@@ -838,10 +877,19 @@ const isDateAvailable = (date: any) => {
 
   const anySlotAvailableForDay = daySlots
     .filter((slot) => {
-      if ([2, 3, 4, 5].includes(dayOfWeek) && !weekday1pSlots.includes(slot) && !weekday2pSlots.includes(slot)) {
+      if (
+        [2, 3, 4, 5].includes(dayOfWeek) &&
+        !weekday1pSlots.includes(slot) &&
+        !weekday2pSlots.includes(slot)
+      ) {
         return false
       }
-      if ([0, 6].includes(dayOfWeek) && !weekend1pSlots.includes(slot) && !weekend2pSlots.includes(slot) && !weekend3pSlots.includes(slot)) {
+      if (
+        [0, 6].includes(dayOfWeek) &&
+        !weekend1pSlots.includes(slot) &&
+        !weekend2pSlots.includes(slot) &&
+        !weekend3pSlots.includes(slot)
+      ) {
         return false
       }
       return true
@@ -872,7 +920,7 @@ const isDateAvailable = (date: any) => {
     }
   }
 
-  const available = possibleSlots.some(slot => isSlotAvailable(slot, taken, dayOfWeek))
+  const available = possibleSlots.some((slot) => isSlotAvailable(slot, taken, dayOfWeek))
   return available
 }
 
