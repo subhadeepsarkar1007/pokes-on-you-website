@@ -73,6 +73,9 @@
               </v-img>
             </div>
           </v-card-text>
+          <v-card-text style="text-align: center">
+            <div>₹{{ selectedPrice }}</div>
+          </v-card-text>
         </v-card>
       </v-dialog>
     </v-container>
@@ -117,12 +120,18 @@ const filterTags = [
 interface GalleryImage {
   url: string
   name: string
+  price: number | null
 }
 
 const allImages = ref<GalleryImage[]>([])
 const selectedFilter = ref<string | null>(null)
 const dialog = ref(false)
 const selectedIndex = ref(0)
+
+function parsePriceFromName(name: string) {
+  const match = name.match(/^(\d{3})/)
+  return match ? Number(match[1]) : null
+}
 
 onMounted(async () => {
   const validPaths = Object.keys(modules).filter((path) => {
@@ -139,9 +148,11 @@ onMounted(async () => {
       if (typeof loader === 'function') {
         try {
           const mod = (await loader()) as { default: string }
+          const filename = path.split('/').pop()?.toLowerCase() || ''
           return {
             url: mod.default,
-            name: path.split('/').pop()?.toLowerCase() || '',
+            name: filename,
+            price: parsePriceFromName(filename),
           }
         } catch (err) {
           console.error(`Error loading image at ${path}:`, err)
@@ -153,7 +164,7 @@ onMounted(async () => {
 
   // 3. Filter out any null values from failed loads
   allImages.value = resolvedImages.filter(
-    (img): img is { url: string; name: string } => img !== null
+    (img): img is GalleryImage => img !== null
   )
 })
 
@@ -181,6 +192,7 @@ const filteredImagesList = computed(() => {
 })
 
 const filteredImages = computed(() => filteredImagesList.value.map((img) => img.url))
+const selectedPrice = computed(() => filteredImagesList.value[selectedIndex.value]?.price ?? null)
 
 function toggleFilter(tag: string) {
   selectedFilter.value = selectedFilter.value === tag ? null : tag
