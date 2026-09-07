@@ -55,6 +55,19 @@
         </v-col>
       </v-row>
 
+      <v-dialog v-model="shippingDialog" persistent max-width="420" content-class="shipping-dialog-content">
+        <v-card class="glass-morphism-dialog shipping-dialog-card" flat>
+          <v-card-text class="shipping-dialog-text">
+            <div class="shipping-title">Shipping charges</div>
+            <ul class="shipping-list">
+              <li>₹50 within West Bengal</li>
+              <li>₹100 for other parts of India</li>
+            </ul>
+            <p class="shipping-offer"><span class="offer-highlight">Enjoy discounts on upfront purchase.</span></p>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
       <v-dialog v-model="dialog" max-width="90vw" @click:outside="dialog = false">
         <v-card class="dialog-card glass-morphism-dialog" flat @click="dialog = false">
           <v-card-text class="pa-0 d-flex align-center justify-center">
@@ -83,7 +96,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onBeforeUnmount } from 'vue'
 
 const modules = import.meta.glob('/src/assets/*.{png,jpg,jpeg,svg,gif,webp}', {
   eager: false,
@@ -126,14 +139,32 @@ interface GalleryImage {
 const allImages = ref<GalleryImage[]>([])
 const selectedFilter = ref<string | null>(null)
 const dialog = ref(false)
+const shippingDialog = ref(false)
 const selectedIndex = ref(0)
+let shippingNoticeTimer: ReturnType<typeof setTimeout> | null = null
 
 function parsePriceFromName(name: string) {
   const match = name.match(/^(\d{3})/)
   return match ? Number(match[1]) : null
 }
 
+function showShippingNoticeOnce() {
+  if (typeof window === 'undefined') return
+
+  const hasSeenShippingNotice = sessionStorage.getItem('galleryShippingNoticeShown') === 'true'
+  if (hasSeenShippingNotice) return
+
+  shippingDialog.value = true
+  sessionStorage.setItem('galleryShippingNoticeShown', 'true')
+
+  shippingNoticeTimer = setTimeout(() => {
+    shippingDialog.value = false
+  }, 5000)
+}
+
 onMounted(async () => {
+  showShippingNoticeOnce()
+
   const validPaths = Object.keys(modules).filter((path) => {
     const name = path.split('/').pop() || ''
     return !exclude.includes(name)
@@ -193,6 +224,12 @@ const filteredImagesList = computed(() => {
 
 const filteredImages = computed(() => filteredImagesList.value.map((img) => img.url))
 const selectedPrice = computed(() => filteredImagesList.value[selectedIndex.value]?.price ?? null)
+
+onBeforeUnmount(() => {
+  if (shippingNoticeTimer) {
+    clearTimeout(shippingNoticeTimer)
+  }
+})
 
 function toggleFilter(tag: string) {
   selectedFilter.value = selectedFilter.value === tag ? null : tag
@@ -320,6 +357,42 @@ function open(index: number) {
   -webkit-backdrop-filter: blur(15px);
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.shipping-dialog-card {
+  padding: 8px 12px;
+}
+
+.shipping-dialog-text {
+  text-align: center;
+  color: #2b1d3a;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.shipping-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.shipping-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px;
+}
+
+.shipping-list li {
+  margin-bottom: 6px;
+}
+
+.shipping-offer {
+  margin: 0;
+  font-weight: 600;
+}
+
+.offer-highlight {
+  color: #b00020;
 }
 
 .image-wrapper {
