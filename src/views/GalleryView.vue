@@ -55,16 +55,18 @@
         </v-col>
       </v-row>
 
-      <v-dialog v-model="shippingDialog" persistent max-width="420" content-class="shipping-dialog-content">
-        <v-card class="glass-morphism-dialog shipping-dialog-card" flat>
-          <v-card-text class="shipping-dialog-text">
-            <div class="shipping-title">Shipping charges</div>
-            <ul class="shipping-list">
-              <li>₹50 within West Bengal</li>
+      <v-dialog v-model="shippingDialog" persistent max-width="500">
+        <v-card class="glass-card pa-6">
+          <h3 class="text-center mb-4 menu-title">Shipping Charges</h3>
+          <v-divider class="mb-4"></v-divider>
+
+          <div class="terms-content">
+            <ul class="policy-list">
+              <li>Shipping ₹50 within West Bengal</li>
               <li>₹100 for other parts of India</li>
             </ul>
-            <p class="shipping-offer"><span class="offer-highlight">Enjoy discounts on upfront purchase.</span></p>
-          </v-card-text>
+            <p class="shipping-offer text-center">Enjoy discounts on upfront purchase.</p>
+          </div>
         </v-card>
       </v-dialog>
 
@@ -359,40 +361,36 @@ function open(index: number) {
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-.shipping-dialog-card {
-  padding: 8px 12px;
+.shipping-offer {
+  margin-top: 40px;
+  font-weight: 600;
+  color: #b00020;
 }
 
-.shipping-dialog-text {
-  text-align: center;
-  color: #2b1d3a;
-  font-size: 1rem;
+.menu-title {
+  color: #4a4a4a;
+  font-family: inherit;
+  font-weight: 700;
+}
+
+.policy-list {
+  padding-left: 20px;
+  color: #4a4a4a;
+  font-size: 0.95rem;
   line-height: 1.6;
 }
 
-.shipping-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 10px;
+.policy-list li {
+  margin-bottom: 8px;
 }
 
-.shipping-list {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 10px;
-}
-
-.shipping-list li {
-  margin-bottom: 6px;
-}
-
-.shipping-offer {
-  margin: 0;
-  font-weight: 600;
-}
-
-.offer-highlight {
-  color: #b00020;
+.glass-card {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-radius: 30px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  z-index: 2;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .image-wrapper {
