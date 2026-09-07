@@ -62,7 +62,7 @@
 
           <div class="terms-content">
             <ul class="policy-list">
-              <li>Shipping ₹50 within West Bengal</li>
+              <li>₹50 within West Bengal</li>
               <li>₹100 for other parts of India</li>
             </ul>
             <p class="shipping-offer text-center">Enjoy discounts on upfront purchase.</p>
