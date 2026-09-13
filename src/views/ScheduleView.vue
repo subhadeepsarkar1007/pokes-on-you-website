@@ -559,6 +559,7 @@ const unavailableDates = ref<string[]>([
   // '2026-02-18',
   // '2026-02-19',
   // '2026-02-20',
+  '2026-09-15',
 ])
 
 const maxDate = computed(() => {
