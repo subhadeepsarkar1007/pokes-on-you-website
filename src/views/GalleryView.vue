@@ -161,7 +161,7 @@ function showShippingNoticeOnce() {
 
   shippingNoticeTimer = setTimeout(() => {
     shippingDialog.value = false
-  }, 5000)
+  }, 3000)
 }
 
 onMounted(async () => {
