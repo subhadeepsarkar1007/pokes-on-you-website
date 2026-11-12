@@ -644,9 +644,21 @@ const formatName = (val: string) => {
 
 const weekday1pSlots = ['3:00pm-4:30pm', '4:30pm-6:00pm']
 const weekday2pSlots = ['3:00pm-6:00pm']
-const weekend1pSlots = ['12:00pm-1:30pm', '1:30pm-3:00pm', '3:00pm-4:30pm', '4:30pm-6:00pm']
-const weekend2pSlots = ['12:00pm-3:00pm', '1:30pm-4:30pm', '3:00pm-6:00pm']
-const weekend3pSlots = ['12:00pm-4:30pm', '1:30pm-6:00pm']
+const weekend1pSlots = [
+  // '12:00pm-1:30pm',
+  // '1:30pm-3:00pm',
+  '3:00pm-4:30pm',
+  '4:30pm-6:00pm',
+]
+const weekend2pSlots = [
+  // '12:00pm-3:00pm',
+  // '1:30pm-4:30pm',
+  '3:00pm-6:00pm',
+]
+const weekend3pSlots: string[] = [
+  // '12:00pm-4:30pm',
+  '1:30pm-6:00pm',
+]
 
 const slotDependencies: Record<string, string[]> = {
   // Weekday 2p
