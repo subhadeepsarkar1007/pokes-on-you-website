@@ -722,7 +722,8 @@ const isSlotAvailable = (slot: string, taken: Set<string>, dayOfWeek: number) =>
 
   // Use appropriate blockers based on day type
   const blockers =
-    ([2, 3, 4, 5].includes(dayOfWeek) ? weekdayBlockers : weekendBlockers)[slot] || []
+    // ([2, 3, 4, 5].includes(dayOfWeek) ? weekdayBlockers : weekendBlockers)[slot] || []
+    ([1, 2, 3, 4, 5].includes(dayOfWeek) ? weekdayBlockers : weekendBlockers)[slot] || []
   if (blockers.some((blocker) => taken.has(blocker))) return false
   return true
 }
@@ -797,12 +798,13 @@ const availableSlots = computed(() => {
   if (!booking.date) return []
   const d = new Date(booking.date)
   const dayOfWeek = d.getDay()
-  if (dayOfWeek === 1) return ['Closed on Mondays']
-
+  // Temporarily allow Monday using the existing weekday slots.
+  // if (dayOfWeek === 1) return ['Closed on Mondays']
   const taken = new Set(takenSlotsForSelectedDate.value)
 
   let possibleSlots: string[] = []
-  if ([2, 3, 4, 5].includes(dayOfWeek)) {
+  // if ([2, 3, 4, 5].includes(dayOfWeek)) {
+  if ([1, 2, 3, 4, 5].includes(dayOfWeek)) {
     // weekdays
     if (booking.count === 1) {
       possibleSlots = weekday1pSlots
@@ -857,9 +859,9 @@ const isDateAvailable = (date: any) => {
     return false
   }
 
-  // 3. MONDAY CHECK
   const dayOfWeek = d.getDay()
-  if (dayOfWeek === 1) return false
+  // Temporarily allow Monday bookings.
+  // if (dayOfWeek === 1) return false
 
   // 4. FIREBASE APPOINTMENTS CHECK
   const comparisonDateString = d.toDateString()
@@ -882,7 +884,8 @@ const isDateAvailable = (date: any) => {
   const anySlotAvailableForDay = daySlots
     .filter((slot) => {
       if (
-        [2, 3, 4, 5].includes(dayOfWeek) &&
+        // [2, 3, 4, 5].includes(dayOfWeek) &&
+        [1, 2, 3, 4, 5].includes(dayOfWeek) &&
         !weekday1pSlots.includes(slot) &&
         !weekday2pSlots.includes(slot)
       ) {
@@ -906,7 +909,8 @@ const isDateAvailable = (date: any) => {
 
   // 5. CHECK IF ANY SLOT FOR CURRENT COUNT IS AVAILABLE
   let possibleSlots: string[] = []
-  if ([2, 3, 4, 5].includes(dayOfWeek)) {
+  // if ([2, 3, 4, 5].includes(dayOfWeek)) {
+  if ([1, 2, 3, 4, 5].includes(dayOfWeek)) {
     // weekdays
     if (booking.count === 1) {
       possibleSlots = weekday1pSlots
@@ -939,7 +943,8 @@ const getEventColor = (date: any) => {
 
   const totalPiercees = dayApps.reduce((sum, app) => sum + (Number(app.count) || 0), 0)
 
-  if ([2, 3, 4, 5].includes(dayOfWeek)) {
+  // if ([2, 3, 4, 5].includes(dayOfWeek)) {
+  if ([1, 2, 3, 4, 5].includes(dayOfWeek)) {
     if (totalPiercees === 1) return 'orange'
     if (totalPiercees === 2) return 'red'
   } else if ([0, 6].includes(dayOfWeek)) {
