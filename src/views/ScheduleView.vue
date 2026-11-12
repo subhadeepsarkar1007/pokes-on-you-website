@@ -262,7 +262,15 @@
             </v-btn>
 
             <div class="text-caption mt-6">
-              <em>*All prices include basic jewelry, based on the selected piercings*</em>
+              <em>
+                *All prices include basic jewelry, based on the selected piercings. Browse the
+                jewellery gallery for other options
+                <a
+                  class="gallery-link"
+                  href="#"
+                  @click.prevent="jewelryGalleryDialog = true"
+                >here</a>*
+              </em>
             </div>
           </div>
 
@@ -321,6 +329,16 @@
         <v-btn block class="submit-btn action-btn" @click="anatomyDialog = false">
           I Understand & Wish to Proceed
         </v-btn>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="jewelryGalleryDialog" max-width="1000" scrollable>
+      <v-card class="glass-card pa-6">
+        <h3 class="text-center mb-4 menu-title">Jewellery Gallery</h3>
+        <v-divider class="mb-4"></v-divider>
+        <v-card-text class="pa-0 gallery-dialog-content">
+          <GalleryView embedded />
+        </v-card-text>
       </v-card>
     </v-dialog>
 
@@ -529,6 +547,7 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted } from 'vue'
+import GalleryView from './GalleryView.vue'
 import { db } from '../firebase'
 import {
   collection,
@@ -545,6 +564,7 @@ const formRef = ref<any>(null)
 const valid = ref(false)
 const submitted = ref(false)
 const termsDialog = ref(false)
+const jewelryGalleryDialog = ref(false)
 const termsConfirmed = ref(false)
 const showTermsError = ref(false)
 const dateMenu = ref(false)
@@ -1284,6 +1304,17 @@ onMounted(() => {
 
 .text-error {
   color: #d32f2f;
+}
+
+.gallery-link {
+  color: #6f5a86;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.gallery-dialog-content {
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
 .animate-in {

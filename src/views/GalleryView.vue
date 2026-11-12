@@ -1,12 +1,16 @@
 <template>
-  <div class="page-container">
-    <div class="secondary-bg-abs" aria-hidden="true"></div>
+  <div class="page-container" :class="{ 'page-container--embedded': props.embedded }">
+    <div v-if="!props.embedded" class="secondary-bg-abs" aria-hidden="true"></div>
 
-    <div class="logo-wrapper">
+    <div v-if="!props.embedded" class="logo-wrapper">
       <img src="../assets/logo.jpg" alt="Logo" class="scrollable-logo" />
     </div>
 
-    <v-container fluid class="gallery-container">
+    <v-container
+      fluid
+      class="gallery-container"
+      :class="{ 'gallery-container--embedded': props.embedded }"
+    >
       <v-row class="filter-wrapper d-flex flex-wrap justify-center mb-6">
         <v-chip
           :class="['ma-1 filter-chip', !selectedFilter ? 'active-chip' : 'glass-chip']"
@@ -55,7 +59,7 @@
         </v-col>
       </v-row>
 
-      <v-dialog v-model="shippingDialog" persistent max-width="500">
+      <v-dialog v-if="!props.embedded" v-model="shippingDialog" persistent max-width="500">
         <v-card class="glass-card pa-6">
           <h3 class="text-center mb-4 menu-title">Shipping Charges</h3>
           <v-divider class="mb-4"></v-divider>
@@ -99,6 +103,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, onBeforeUnmount } from 'vue'
+
+const props = withDefaults(defineProps<{ embedded?: boolean }>(), { embedded: false })
 
 const modules = import.meta.glob('/src/assets/*.{png,jpg,jpeg,svg,gif,webp}', {
   eager: false,
@@ -165,7 +171,7 @@ function showShippingNoticeOnce() {
 }
 
 onMounted(async () => {
-  showShippingNoticeOnce()
+  if (!props.embedded) showShippingNoticeOnce()
 
   const validPaths = Object.keys(modules).filter((path) => {
     const name = path.split('/').pop() || ''
@@ -255,6 +261,11 @@ function open(index: number) {
   background-attachment: fixed;
 }
 
+.page-container--embedded {
+  min-height: 0;
+  background: transparent !important;
+}
+
 .secondary-bg-abs {
   background-color: #d8d9f7;
   width: 100vw;
@@ -284,6 +295,11 @@ function open(index: number) {
   position: relative;
   z-index: 1;
   padding-bottom: 80px;
+}
+
+.gallery-container--embedded {
+  padding: 0 !important;
+  background: transparent !important;
 }
 
 /* Filter Section */
