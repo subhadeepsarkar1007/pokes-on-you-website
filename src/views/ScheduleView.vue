@@ -31,7 +31,7 @@
               <span class="label">Appointment:</span>
               <span>
                 <div class="value">{{ formattedDisplayDate }}</div>
-                <div class="value">{{ booking.slot }}</div>
+                <div class="value">{{ formattedAppointmentSlot }}</div>
               </span>
             </div>
             <div class="detail-row">
@@ -59,16 +59,23 @@
             </div>
           </div>
 
-          <div class="grand-total-section mb-6 pa-4 text-center">
+          <div v-if="bookingFee > 0" class="grand-total-section mb-6 pa-4 text-center">
             <div class="text-overline">Booking Fee Due</div>
             <div class="text-h4 font-weight-black">₹{{ bookingFee }}</div>
             <div class="pa-4">
               <img src="../assets/payment-qr.jpg" alt="Payment QR Code" class="payment-qr" />
             </div>
-            <div class="text-caption mt-1">Total Est. Service: ₹{{ grandTotal }}</div>
-            <div class="text-caption mt-1">
-              Balance Due after Service: ₹{{ grandTotal - bookingFee }}
-            </div>
+            <template v-if="hasConsultationSelection">
+              <div v-if="grandTotal > 0" class="text-caption mt-1">
+                Piercing services subtotal: ₹{{ grandTotal }}
+              </div>
+            </template>
+            <template v-else>
+              <div class="text-caption mt-1">Total Est. Service: ₹{{ grandTotal }}</div>
+              <div class="text-caption mt-1">
+                Balance Due after Service: ₹{{ grandTotal - bookingFee }}
+              </div>
+            </template>
           </div>
         </div>
 
@@ -122,8 +129,103 @@
             />
           </div>
 
+          <div
+            v-for="(p, index) in booking.piercees"
+            :key="index"
+            class="piercee-section pa-4 mb-6"
+          >
+            <div class="d-flex justify-space-between align-center mb-2">
+              <div>
+                <label class="section-title">Piercee #{{ index + 1 }}</label>
+                <div class="text-caption text-error">
+                  <em>Choose piercings (max 3)</em>
+                </div>
+              </div>
+              <div class="text-right piercee-price-details">
+                <div class="price-tag">₹{{ getPersonTotal(index) }}</div>
+              </div>
+            </div>
+
+            <v-text-field
+              density="compact"
+              v-model="p.name"
+              :rules="rules.required"
+              :placeholder="`Person ${index + 1} Name`"
+              variant="underlined"
+              class="mb-4 custom-input-underlined name-text-field"
+              @blur="p.name = formatName(p.name)"
+            />
+            <div
+              v-for="(sel, sIdx) in p.selections"
+              :key="sIdx"
+              class="d-flex align-center mt-2 animate-in"
+            >
+              <v-select
+                density="compact"
+                :model-value="sel.piercing"
+                :items="getPiercingOptions(index, sIdx)"
+                :rules="rules.required"
+                item-title="label"
+                return-object
+                placeholder="Choose Piercing/Service"
+                variant="underlined"
+                class="flex-grow-1 custom-input-underlined piercing-select-field"
+                hide-details
+                clearable
+                @update:model-value="(val) => onPiercingSelectionChanged(index, sel, val)"
+              />
+
+              <div
+                v-if="sel.piercing && !isConsultationService(sel.piercing)"
+                class="pair-checkbox-container"
+              >
+                <input
+                  type="checkbox"
+                  :id="'pair-' + index + '-' + sIdx"
+                  v-model="sel.isPair"
+                  class="styled-checkbox"
+                  :disabled="!sel.isPair && getTotalWeight(index) >= 3"
+                />
+                <label :for="'pair-' + index + '-' + sIdx" class="pair-label">Pair</label>
+              </div>
+
+              <v-btn
+                v-if="p.selections.length > 1"
+                size="x-small"
+                density="compact"
+                variant="text"
+                color="red-lighten-2"
+                class="selection-remove-btn"
+                @click="removePiercingField(index, sIdx)"
+              >
+                ✕
+              </v-btn>
+            </div>
+
+            <v-btn
+              v-if="canAddSelection(index)"
+              size="x-small"
+              variant="text"
+              color="#8b76a2"
+              class="mt-4"
+              @click="addPiercingField(index)"
+            >
+              + Add Piercing/Service
+            </v-btn>
+
+            <div class="text-caption mt-6">
+              <em>
+                *All prices include basic jewelry, based on the selected piercings. Browse the
+                jewellery gallery for other options
+                <a class="gallery-link" href="#" @click.prevent="jewelryGalleryDialog = true"
+                  >here</a
+                >*
+              </em>
+            </div>
+          </div>
+
           <v-row dense>
-            <v-col cols="12" sm="6">
+            <v-col cols="12">
               <label class="field-label">Preferred Date</label>
               <v-menu
                 v-model="dateMenu"
@@ -156,123 +258,41 @@
               </v-menu>
             </v-col>
 
-            <v-col cols="12" sm="6">
+            <v-col cols="12">
               <label class="field-label">Available Time Slots</label>
-              <v-select
-                v-model="booking.slot"
-                :items="availableSlots"
-                :rules="rules.required"
-                placeholder="Select a time"
-                variant="solo"
-                class="custom-input"
-                flat
-                :disabled="!booking.date"
-              />
+              <v-row dense>
+                <v-col cols="6">
+                  <v-select
+                    v-model="booking.slot"
+                    :items="availableSlots"
+                    :rules="rules.required"
+                    label="Starting Time"
+                    placeholder="Select start"
+                    variant="solo"
+                    class="custom-input"
+                    flat
+                    :disabled="!booking.date || !availableSlots.length"
+                    @update:model-value="slotConflictMessage = ''"
+                  />
+                </v-col>
+                <v-col cols="6">
+                  <v-select
+                    :model-value="appointmentEndTime"
+                    :items="appointmentEndTime ? [appointmentEndTime] : []"
+                    label="Ending Time"
+                    placeholder="Calculated end"
+                    variant="solo"
+                    class="custom-input"
+                    flat
+                    disabled
+                  />
+                </v-col>
+              </v-row>
+              <div v-if="slotConflictMessage" class="text-error text-caption mt-1" role="status">
+                {{ slotConflictMessage }}
+              </div>
             </v-col>
           </v-row>
-
-          <div
-            v-for="(p, index) in booking.piercees"
-            :key="index"
-            class="piercee-section pa-4 mb-6"
-          >
-            <div class="d-flex justify-space-between align-center mb-2">
-              <div>
-                <label class="section-title">Piercee #{{ index + 1 }}</label>
-                <div class="text-caption text-error">
-                  <em>Choose piercings (max 3)</em>
-                </div>
-              </div>
-              <div class="text-right">
-                <div class="price-tag">₹{{ getPersonTotal(index) }}</div>
-              </div>
-            </div>
-
-            <v-text-field
-              density="compact"
-              v-model="p.name"
-              :rules="rules.required"
-              :placeholder="`Person ${index + 1} Name`"
-              variant="underlined"
-              class="mb-4 custom-input-underlined"
-              @blur="p.name = formatName(p.name)"
-            />
-            <label class="field-label-small">
-              Piercing Selections ({{ getTotalWeight(index) }}/3)
-            </label>
-            <div
-              v-for="(sel, sIdx) in p.selections"
-              :key="sIdx"
-              class="d-flex align-center mt-2 animate-in"
-            >
-              <v-select
-                density="compact"
-                v-model="sel.piercing"
-                :items="piercingOptions"
-                :rules="rules.required"
-                item-title="label"
-                return-object
-                placeholder="Choose Piercing"
-                variant="underlined"
-                class="flex-grow-1 custom-input-underlined"
-                hide-details
-                clearable
-                @update:model-value="
-                  (val) => {
-                    if (!val) {
-                      sel.isPair = false
-                    } else {
-                      checkAnatomyRequirement(val)
-                    }
-                  }
-                "
-              />
-
-              <div v-if="sel.piercing" class="pair-checkbox-container">
-                <input
-                  type="checkbox"
-                  :id="'pair-' + index + '-' + sIdx"
-                  v-model="sel.isPair"
-                  class="styled-checkbox"
-                  :disabled="!sel.isPair && getTotalWeight(index) >= 3"
-                />
-                <label :for="'pair-' + index + '-' + sIdx" class="pair-label">Pair</label>
-              </div>
-
-              <v-btn
-                v-if="p.selections.length > 1"
-                size="small"
-                variant="text"
-                color="red-lighten-2"
-                @click="removePiercingField(index, sIdx)"
-              >
-                ✕
-              </v-btn>
-            </div>
-
-            <v-btn
-              v-if="getTotalWeight(index) < 3"
-              size="x-small"
-              variant="text"
-              color="#8b76a2"
-              class="mt-4"
-              @click="addPiercingField(index)"
-            >
-              + Add Piercing
-            </v-btn>
-
-            <div class="text-caption mt-6">
-              <em>
-                *All prices include basic jewelry, based on the selected piercings. Browse the
-                jewellery gallery for other options
-                <a
-                  class="gallery-link"
-                  href="#"
-                  @click.prevent="jewelryGalleryDialog = true"
-                >here</a>*
-              </em>
-            </div>
-          </div>
 
           <div
             v-if="grandTotal > 0"
@@ -282,12 +302,19 @@
             <span class="text-h6 font-weight-black">₹{{ grandTotal }}</span>
           </div>
 
-          <v-btn block class="action-btn terms-btn mb-3" elevation="0" @click="termsDialog = true">
+          <v-btn
+            v-if="hasAnyPiercingService"
+            block
+            class="action-btn terms-btn mb-3"
+            elevation="0"
+            @click="termsDialog = true"
+          >
             {{ termsConfirmed ? '✅ Policies Reviewed' : 'Review Terms & Policies' }}
           </v-btn>
 
           <v-btn
-            :disabled="!formReady"
+            :disabled="!formReady || isSubmitting"
+            :loading="isSubmitting"
             block
             class="action-btn submit-btn"
             elevation="0"
@@ -295,7 +322,10 @@
           >
             Submit Booking Request
           </v-btn>
-          <div v-if="!termsConfirmed && valid" class="text-center text-error text-caption mt-2">
+          <div
+            v-if="hasAnyPiercingService && !termsConfirmed && valid"
+            class="text-center text-error text-caption mt-2"
+          >
             Please review and accept policies to submit
           </div>
         </v-form>
@@ -371,7 +401,11 @@
               cancel/reschedule less than 12 hours before your appointment. If I must cancel the
               appointment, you will receive a full refund.
             </li>
-            <li>Each appointment is allotted <strong>2 hours</strong>.</li>
+            <li>
+              Consultation/Downsize takes 30 minutes per person when no piercing is selected.
+              Piercing services take 1 hour per person. Group appointment times are calculated from
+              each person's selected services.
+            </li>
             <li>
               Please try to arrive within the first 30 minutes of your scheduled time. Late arrivals
               may result in extended waiting times or cancellation.
@@ -542,6 +576,37 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <v-dialog v-model="appointmentNoticeDialog" max-width="500" persistent>
+      <v-card class="glass-card pa-6">
+        <h3 class="text-center mb-4 menu-title">Appointment Details</h3>
+        <v-divider class="mb-4"></v-divider>
+
+        <div class="appointment-notice">
+          <div class="appointment-notice-row">
+            <span class="label">Appointment Slot:</span>
+            <strong>{{ formattedAppointmentSlot }}</strong>
+          </div>
+          <div class="appointment-notice-row">
+            <span class="label">Reporting Time:</span>
+            <strong>{{ reportingTime }}</strong>
+          </div>
+
+          <p class="appointment-notice-paragraph mt-5 mb-0">
+            <em>
+              Please report within the first 20 minutes of your appointment slot. Late arrival may not be accommodated if it affects later appointments. Depending on the schedule and clients booked afterward, you may need to wait or your appointment may be cancelled.  If cancelled, a new appointment must be booked for another day.
+            </em>
+          </p>
+        </div>
+
+        <v-btn
+          class="submit-btn action-btn appointment-notice-ok mt-6"
+          @click="appointmentNoticeDialog = false"
+        >
+          OK
+        </v-btn>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -551,25 +616,50 @@ import GalleryView from './GalleryView.vue'
 import { db } from '../firebase'
 import {
   collection,
-  addDoc,
   serverTimestamp,
   query,
+  where,
   orderBy,
   onSnapshot,
   doc,
+  getDocs,
+  runTransaction,
   writeBatch,
+  Timestamp,
 } from 'firebase/firestore'
+
+type PiercingOption = { label: string; price?: number; isConsultation?: boolean }
+type PiercingSelection = { piercing: PiercingOption | null; isPair: boolean }
+type Piercee = { name: string; selections: PiercingSelection[] }
+type AppointmentDate = Date | string | number | { toDate: () => Date } | null
+type AppointmentRecord = {
+  id: string
+  date?: AppointmentDate
+  slot?: string
+  count?: number
+  piercees?: Piercee[]
+}
+
+class AppointmentSlotUnavailableError extends Error {
+  constructor() {
+    super('The selected appointment time is no longer available.')
+    this.name = 'AppointmentSlotUnavailableError'
+  }
+}
 
 const formRef = ref<any>(null)
 const valid = ref(false)
 const submitted = ref(false)
+const isSubmitting = ref(false)
+const appointmentNoticeDialog = ref(false)
 const termsDialog = ref(false)
 const jewelryGalleryDialog = ref(false)
 const termsConfirmed = ref(false)
 const showTermsError = ref(false)
 const dateMenu = ref(false)
+const slotConflictMessage = ref('')
 const todayDate = new Date()
-const appointments = ref<any[]>([])
+const appointments = ref<AppointmentRecord[]>([])
 const anatomyDialog = ref(false)
 const hasSeenAnatomyWarning = ref(false)
 const unavailableDates = ref<string[]>([
@@ -598,7 +688,9 @@ const booking = reactive({
   date: null as Date | null,
   count: 1,
   slot: '',
-  piercees: [{ name: '', selections: [{ piercing: null as any, isPair: false }] }],
+  piercees: [
+    { name: '', selections: [{ piercing: null as PiercingOption | null, isPair: false }] },
+  ],
 })
 
 const rules = {
@@ -613,7 +705,8 @@ const rules = {
   ],
 }
 
-const piercingOptions = [
+const piercingOptions: PiercingOption[] = [
+  { label: 'Consultation/Downsize', isConsultation: true },
   { label: 'Lobe (₹500)', price: 500 },
   { label: 'Nose (₹500)', price: 500 },
   { label: 'Helix (₹700)', price: 700 },
@@ -637,7 +730,19 @@ const piercingOptions = [
 ]
 
 // Computed Booking Fee based on head count
+const isConsultationService = (service: PiercingOption | null | undefined) =>
+  service?.isConsultation === true || service?.label?.toLowerCase() === 'consultation/downsize'
+
+const hasAnyPiercingService = computed(() =>
+  booking.piercees.some((person) =>
+    person.selections.some(
+      (selection) => selection.piercing !== null && !isConsultationService(selection.piercing),
+    ),
+  ),
+)
+
 const bookingFee = computed(() => {
+  if (!hasAnyPiercingService.value) return 0
   const feeMap: Record<number, number> = { 1: 200, 2: 400, 3: 600 }
   return feeMap[booking.count] || 0
 })
@@ -647,6 +752,72 @@ const getPersonTotal = (pIndex: number) => {
     const basePrice = sel.piercing?.price || 0
     return sum + (sel.isPair ? basePrice * 2 : basePrice)
   }, 0)
+}
+
+const hasConsultation = (pIndex: number) =>
+  booking.piercees[pIndex]?.selections.some((sel) => isConsultationService(sel.piercing)) ?? false
+
+const hasConsultationSelection = computed(() =>
+  booking.piercees.some((_, index) => hasConsultation(index)),
+)
+
+const getPiercingOptions = (pIndex: number, sIndex: number) => {
+  const selections = booking.piercees[pIndex]?.selections ?? []
+  const currentService = selections[sIndex]?.piercing
+  const currentWeight = isRealPiercingService(currentService)
+    ? selections[sIndex]?.isPair
+      ? 2
+      : 1
+    : 0
+  const weightWithoutCurrent = getTotalWeight(pIndex) - currentWeight
+  const consultationSelectedElsewhere = selections.some(
+    (sel, index) => index !== sIndex && isConsultationService(sel.piercing),
+  )
+
+  return piercingOptions.map((option) => ({
+    ...option,
+    props: {
+      disabled:
+        (option.isConsultation && consultationSelectedElsewhere) ||
+        (!option.isConsultation && weightWithoutCurrent >= 3),
+    },
+  }))
+}
+
+const canAddSelection = (pIndex: number) => {
+  const selections = booking.piercees[pIndex]?.selections ?? []
+  return (
+    selections.length < 4 &&
+    (getTotalWeight(pIndex) < 3 || !selections.some((sel) => isConsultationService(sel.piercing)))
+  )
+}
+
+const onPiercingSelectionChanged = (
+  pIndex: number,
+  selection: PiercingSelection,
+  service: PiercingOption | null,
+) => {
+  const selections = booking.piercees[pIndex]?.selections ?? []
+  const consultationAlreadySelected = selections.some(
+    (currentSelection) =>
+      currentSelection !== selection && isConsultationService(currentSelection.piercing),
+  )
+  const currentWeight = isRealPiercingService(selection.piercing) ? (selection.isPair ? 2 : 1) : 0
+  const newWeight = isRealPiercingService(service) ? (selection.isPair ? 2 : 1) : 0
+  if (
+    (isConsultationService(service) && consultationAlreadySelected) ||
+    getTotalWeight(pIndex) - currentWeight + newWeight > 3
+  ) {
+    return
+  }
+
+  selection.piercing = service
+  slotConflictMessage.value = ''
+  if (!service || isConsultationService(service)) {
+    selection.isPair = false
+  } else {
+    checkAnatomyRequirement(service)
+  }
 }
 
 const grandTotal = computed(() => {
@@ -662,102 +833,121 @@ const formatName = (val: string) => {
     .join(' ')
 }
 
-const weekday1pSlots = ['3:00pm-4:30pm', '4:30pm-6:00pm']
-const weekday2pSlots = ['3:00pm-6:00pm']
-const weekend1pSlots = [
-  // '12:00pm-1:30pm',
-  // '1:30pm-3:00pm',
-  '3:00pm-4:30pm',
-  '4:30pm-6:00pm',
-]
-const weekend2pSlots = [
-  // '12:00pm-3:00pm',
-  // '1:30pm-4:30pm',
-  '3:00pm-6:00pm',
-]
-const weekend3pSlots: string[] = [
-  // '12:00pm-4:30pm',
-  '1:30pm-6:00pm',
-]
+const DAY_START_MINUTES = 15 * 60
+const DAY_END_MINUTES = 18 * 60
+const SLOT_STEP_MINUTES = 30
 
-const slotDependencies: Record<string, string[]> = {
-  // Weekday 2p
-  '3:00pm-6:00pm': ['3:00pm-4:30pm', '4:30pm-6:00pm'],
-  // Weekend 2p
-  '12:00pm-3:00pm': ['12:00pm-1:30pm', '1:30pm-3:00pm'],
-  '1:30pm-4:30pm': ['1:30pm-3:00pm', '3:00pm-4:30pm'],
-  // Weekend 3p
-  '12:00pm-4:30pm': ['12:00pm-1:30pm', '1:30pm-3:00pm', '3:00pm-4:30pm'],
-  '1:30pm-6:00pm': ['1:30pm-3:00pm', '3:00pm-4:30pm', '4:30pm-6:00pm'],
+const formatTime = (minutes: number) => {
+  const hour24 = Math.floor(minutes / 60)
+  const minute = String(minutes % 60).padStart(2, '0')
+  const period = hour24 >= 12 ? 'pm' : 'am'
+  const hour12 = hour24 % 12 || 12
+  return `${hour12}:${minute}${period}`
 }
 
-const weekdayBlockers: Record<string, string[]> = {
-  '3:00pm-4:30pm': ['3:00pm-6:00pm'],
-  '4:30pm-6:00pm': ['3:00pm-6:00pm'],
-  '3:00pm-6:00pm': ['3:00pm-4:30pm', '4:30pm-6:00pm'],
+const parseTime = (value: string) => {
+  const match = value.match(/^\s*(\d{1,2}):(\d{2})\s*(am|pm)\s*$/i)
+  if (!match) return null
+  let hour = Number(match[1])
+  const minute = Number(match[2])
+  const period = match[3]!.toLowerCase()
+  if (hour < 1 || hour > 12 || minute > 59) return null
+  if (period === 'pm' && hour !== 12) hour += 12
+  if (period === 'am' && hour === 12) hour = 0
+  return hour * 60 + minute
 }
 
-const weekendBlockers: Record<string, string[]> = {
-  // 1p slots block 2p/3p
-  '12:00pm-1:30pm': ['12:00pm-3:00pm', '12:00pm-4:30pm'],
-  '1:30pm-3:00pm': ['12:00pm-3:00pm', '1:30pm-4:30pm', '12:00pm-4:30pm', '1:30pm-6:00pm'],
-  '3:00pm-4:30pm': ['1:30pm-4:30pm', '3:00pm-6:00pm', '12:00pm-4:30pm', '1:30pm-6:00pm'],
-  '4:30pm-6:00pm': ['3:00pm-6:00pm', '1:30pm-6:00pm'],
-  // 2p slots block 1p and conflicting 2p/3p
-  '12:00pm-3:00pm': [
-    '12:00pm-1:30pm',
-    '1:30pm-3:00pm',
-    '1:30pm-4:30pm',
-    '12:00pm-4:30pm',
-    '1:30pm-6:00pm',
-  ],
-  '1:30pm-4:30pm': [
-    '1:30pm-3:00pm',
-    '3:00pm-4:30pm',
-    '12:00pm-3:00pm',
-    '3:00pm-6:00pm',
-    '12:00pm-4:30pm',
-    '1:30pm-6:00pm',
-  ],
-  '3:00pm-6:00pm': [
-    '3:00pm-4:30pm',
-    '4:30pm-6:00pm',
-    '1:30pm-4:30pm',
-    '12:00pm-4:30pm',
-    '1:30pm-6:00pm',
-  ],
-  // 3p slots block 1p and 2p
-  '12:00pm-4:30pm': [
-    '12:00pm-1:30pm',
-    '1:30pm-3:00pm',
-    '3:00pm-4:30pm',
-    '12:00pm-3:00pm',
-    '1:30pm-4:30pm',
-    '3:00pm-6:00pm',
-    '1:30pm-6:00pm',
-  ],
-  '1:30pm-6:00pm': [
-    '12:00pm-3:00pm',
-    '1:30pm-3:00pm',
-    '3:00pm-4:30pm',
-    '4:30pm-6:00pm',
-    '1:30pm-4:30pm',
-    '3:00pm-6:00pm',
-    '12:00pm-4:30pm',
-  ],
+const isRealPiercingService = (service: PiercingOption | null | undefined) =>
+  Boolean(service) && !isConsultationService(service)
+
+const getPersonDurationMinutes = (person: Pick<Piercee, 'selections'> | undefined) => {
+  const selections = person?.selections ?? []
+  if (selections.some((selection) => isRealPiercingService(selection.piercing))) return 60
+  if (selections.some((selection) => isConsultationService(selection.piercing))) return 30
+  return 60
 }
 
-const isSlotAvailable = (slot: string, taken: Set<string>, dayOfWeek: number) => {
-  if (taken.has(slot)) return false
-  const deps = slotDependencies[slot] || []
-  if (!deps.every((dep) => !taken.has(dep))) return false
+const bookingDurationMinutes = computed(() =>
+  booking.piercees.reduce((total, person) => total + getPersonDurationMinutes(person), 0),
+)
 
-  // Use appropriate blockers based on day type
-  const blockers =
-    // ([2, 3, 4, 5].includes(dayOfWeek) ? weekdayBlockers : weekendBlockers)[slot] || []
-    ([1, 2, 3, 4, 5].includes(dayOfWeek) ? weekdayBlockers : weekendBlockers)[slot] || []
-  if (blockers.some((blocker) => taken.has(blocker))) return false
-  return true
+const durationLabel = computed(() => {
+  const hours = Math.floor(bookingDurationMinutes.value / 60)
+  const minutes = bookingDurationMinutes.value % 60
+  return [hours ? `${hours}h` : '', minutes ? `${minutes}m` : ''].filter(Boolean).join(' ')
+})
+
+const appointmentEndTime = computed(() => {
+  const start = parseTime(booking.slot)
+  return start === null ? '' : formatTime(start + bookingDurationMinutes.value)
+})
+
+const formattedAppointmentSlot = computed(() =>
+  booking.slot && appointmentEndTime.value ? `${booking.slot} - ${appointmentEndTime.value}` : '',
+)
+
+const getAppointmentDate = (date: unknown): Date | null => {
+  if (!date) return null
+  let parsedDate: Date
+  if (date instanceof Date) {
+    parsedDate = date
+  } else if (typeof date === 'string' || typeof date === 'number') {
+    parsedDate = new Date(date)
+  } else if (typeof date === 'object' && 'toDate' in date && typeof date.toDate === 'function') {
+    parsedDate = date.toDate()
+  } else {
+    return null
+  }
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate
+}
+
+const getAppointmentDurationMinutes = (appointment: AppointmentRecord) => {
+  if (Array.isArray(appointment.piercees) && appointment.piercees.length) {
+    return appointment.piercees.reduce(
+      (total: number, person) => total + getPersonDurationMinutes(person),
+      0,
+    )
+  }
+  return (Number(appointment.count) || 1) * 60
+}
+
+const getAppointmentInterval = (appointment: AppointmentRecord) => {
+  const times = String(appointment.slot ?? '').match(/\d{1,2}:\d{2}\s*(?:am|pm)/gi) ?? []
+  const start = times[0] ? parseTime(times[0]) : null
+  if (start === null) return { start: DAY_START_MINUTES, end: DAY_END_MINUTES }
+
+  const parsedEnd = times[1] ? parseTime(times[1]) : null
+  const end = parsedEnd ?? start + getAppointmentDurationMinutes(appointment)
+  return end > start ? { start, end } : { start: DAY_START_MINUTES, end: DAY_END_MINUTES }
+}
+
+const isSameDayBookingClosed = (date: Date, now = new Date()) =>
+  date.toDateString() === now.toDateString() && now.getHours() >= 2
+
+const getAvailableStartTimes = (date: Date, durationMinutes: number) => {
+  const now = new Date()
+  if (isSameDayBookingClosed(date, now)) return []
+
+  const dayAppointments = appointments.value.filter((appointment) => {
+    const appointmentDate = getAppointmentDate(appointment.date)
+    return appointmentDate?.toDateString() === date.toDateString()
+  })
+  const intervals = dayAppointments.map(getAppointmentInterval)
+  const isToday = date.toDateString() === now.toDateString()
+  const currentMinutes = now.getHours() * 60 + now.getMinutes()
+  const available: string[] = []
+
+  for (
+    let start = DAY_START_MINUTES;
+    start + durationMinutes <= DAY_END_MINUTES;
+    start += SLOT_STEP_MINUTES
+  ) {
+    if (isToday && start <= currentMinutes) continue
+    const end = start + durationMinutes
+    const overlaps = intervals.some((interval) => start < interval.end && end > interval.start)
+    if (!overlaps) available.push(formatTime(start))
+  }
+  return available
 }
 
 const formattedDisplayDate = computed(() => {
@@ -775,15 +965,19 @@ const formattedDisplayDate = computed(() => {
 
 const getTotalWeight = (pIndex: number) => {
   return (
-    booking.piercees?.[pIndex]?.selections.reduce((sum, sel) => sum + (sel.isPair ? 2 : 1), 0) ?? 0
+    booking.piercees?.[pIndex]?.selections.reduce(
+      (sum, sel) => sum + (isRealPiercingService(sel.piercing) ? (sel.isPair ? 2 : 1) : 0),
+      0,
+    ) ?? 0
   )
 }
 
 const addPiercingField = (pIndex: number) => {
-  if (getTotalWeight(pIndex) < 3) {
+  if (canAddSelection(pIndex)) {
     const piercee = booking.piercees?.[pIndex]
     if (piercee) {
       piercee.selections.push({ piercing: null, isPair: false })
+      slotConflictMessage.value = ''
     }
   }
 }
@@ -792,6 +986,7 @@ const removePiercingField = (pIndex: number, sIndex: number) => {
   const piercee = booking.piercees?.[pIndex]
   if (piercee) {
     piercee.selections.splice(sIndex, 1)
+    slotConflictMessage.value = ''
   }
 }
 
@@ -811,65 +1006,27 @@ const syncPiercees = (val: number) => {
 const onDateSelected = () => {
   dateMenu.value = false
   booking.slot = ''
+  slotConflictMessage.value = ''
 }
-
-// Helper to get taken slots for the currently selected date
-const takenSlotsForSelectedDate = computed(() => {
-  if (!booking.date) return []
-  const selectedDateStr = new Date(booking.date).toDateString()
-
-  return appointments.value
-    .filter((app) => {
-      const appDate = app.date?.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date)
-      return appDate.toDateString() === selectedDateStr
-    })
-    .map((app) => app.slot)
-})
 
 const availableSlots = computed(() => {
   if (!booking.date) return []
-  const d = new Date(booking.date)
-  const dayOfWeek = d.getDay()
-  // Temporarily allow Monday using the existing weekday slots.
-  // if (dayOfWeek === 1) return ['Closed on Mondays']
-  const taken = new Set(takenSlotsForSelectedDate.value)
-
-  let possibleSlots: string[] = []
-  // if ([2, 3, 4, 5].includes(dayOfWeek)) {
-  if ([1, 2, 3, 4, 5].includes(dayOfWeek)) {
-    // weekdays
-    if (booking.count === 1) {
-      possibleSlots = weekday1pSlots
-    } else if (booking.count === 2) {
-      possibleSlots = weekday2pSlots
-    }
-  } else if ([0, 6].includes(dayOfWeek)) {
-    // weekends
-    if (booking.count === 1) {
-      possibleSlots = weekend1pSlots
-    } else if (booking.count === 2) {
-      possibleSlots = weekend2pSlots
-    } else if (booking.count === 3) {
-      possibleSlots = weekend3pSlots
-    }
-  }
-
-  return possibleSlots.filter((slot) => isSlotAvailable(slot, taken, dayOfWeek))
+  return getAvailableStartTimes(new Date(booking.date), bookingDurationMinutes.value)
 })
 
-// 1. Function to get total piercees for a specific date
-const getDailyTotal = (date: any) => {
-  const dateString = new Date(date).toDateString()
+const getDailyTotal = (date: unknown) => {
+  const parsedDate = getAppointmentDate(date)
+  if (!parsedDate) return 0
+  const dateString = parsedDate.toDateString()
   return appointments.value.reduce((sum, app) => {
-    if (!app.date) return sum
-    const appDate = app.date.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date)
-
-    return appDate.toDateString() === dateString ? sum + (Number(app.count) || 0) : sum
+    const appDate = getAppointmentDate(app.date)
+    return appDate?.toDateString() === dateString ? sum + (Number(app.count) || 0) : sum
   }, 0)
 }
 
-const isDateAvailable = (date: any) => {
-  const d = new Date(date)
+const isDateAvailable = (date: unknown) => {
+  const d = getAppointmentDate(date)
+  if (!d) return false
 
   // 1. FORMAT FOR UNAVAILABLE ARRAY (YYYY-MM-DD)
   const yyyymmdd =
@@ -883,109 +1040,18 @@ const isDateAvailable = (date: any) => {
     return false
   }
 
-  const now = new Date()
-
-  // 2. DISABLE TODAY AFTER 4 PM
-  const isToday = d.toDateString() === now.toDateString()
-  if (isToday && now.getHours() >= 16) {
-    return false
-  }
-
-  const dayOfWeek = d.getDay()
-  // Temporarily allow Monday bookings.
-  // if (dayOfWeek === 1) return false
-
-  // 4. FIREBASE APPOINTMENTS CHECK
-  const comparisonDateString = d.toDateString()
-  const dayApps = appointments.value.filter((app) => {
-    const appDate = app.date?.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date)
-    return appDate.toDateString() === comparisonDateString
-  })
-
-  const takenSlots = dayApps.map((a) => a.slot)
-  const taken = new Set(takenSlots)
-
-  const daySlots = [
-    ...weekday1pSlots,
-    ...weekday2pSlots,
-    ...weekend1pSlots,
-    ...weekend2pSlots,
-    ...weekend3pSlots,
-  ]
-
-  const anySlotAvailableForDay = daySlots
-    .filter((slot) => {
-      if (
-        // [2, 3, 4, 5].includes(dayOfWeek) &&
-        [1, 2, 3, 4, 5].includes(dayOfWeek) &&
-        !weekday1pSlots.includes(slot) &&
-        !weekday2pSlots.includes(slot)
-      ) {
-        return false
-      }
-      if (
-        [0, 6].includes(dayOfWeek) &&
-        !weekend1pSlots.includes(slot) &&
-        !weekend2pSlots.includes(slot) &&
-        !weekend3pSlots.includes(slot)
-      ) {
-        return false
-      }
-      return true
-    })
-    .some((slot) => isSlotAvailable(slot, taken, dayOfWeek))
-
-  if (!anySlotAvailableForDay) {
-    return false
-  }
-
-  // 5. CHECK IF ANY SLOT FOR CURRENT COUNT IS AVAILABLE
-  let possibleSlots: string[] = []
-  // if ([2, 3, 4, 5].includes(dayOfWeek)) {
-  if ([1, 2, 3, 4, 5].includes(dayOfWeek)) {
-    // weekdays
-    if (booking.count === 1) {
-      possibleSlots = weekday1pSlots
-    } else if (booking.count === 2) {
-      possibleSlots = weekday2pSlots
-    }
-  } else if ([0, 6].includes(dayOfWeek)) {
-    // weekends
-    if (booking.count === 1) {
-      possibleSlots = weekend1pSlots
-    } else if (booking.count === 2) {
-      possibleSlots = weekend2pSlots
-    } else if (booking.count === 3) {
-      possibleSlots = weekend3pSlots
-    }
-  }
-
-  const available = possibleSlots.some((slot) => isSlotAvailable(slot, taken, dayOfWeek))
-  return available
+  return getAvailableStartTimes(d, bookingDurationMinutes.value).length > 0
 }
 
-// 3. Function for event-color
-const getEventColor = (date: any) => {
-  const d = new Date(date)
-  const dayOfWeek = d.getDay()
+const getEventColor = (date: unknown) => {
+  const d = getAppointmentDate(date)
+  if (!d) return ''
   const dayApps = appointments.value.filter((app) => {
-    const appDate = app.date?.seconds ? new Date(app.date.seconds * 1000) : new Date(app.date)
-    return appDate.toDateString() === d.toDateString()
+    return getAppointmentDate(app.date)?.toDateString() === d.toDateString()
   })
 
-  const totalPiercees = dayApps.reduce((sum, app) => sum + (Number(app.count) || 0), 0)
-
-  // if ([2, 3, 4, 5].includes(dayOfWeek)) {
-  if ([1, 2, 3, 4, 5].includes(dayOfWeek)) {
-    if (totalPiercees === 1) return 'orange'
-    if (totalPiercees === 2) return 'red'
-  } else if ([0, 6].includes(dayOfWeek)) {
-    if (totalPiercees === 1 || totalPiercees === 2) return 'green'
-    if (totalPiercees === 3) return 'orange'
-    if (totalPiercees > 3) return 'red'
-  }
-
-  return ''
+  if (!dayApps.length) return ''
+  return isDateAvailable(d) ? 'orange' : 'red'
 }
 
 const formReady = computed(() => {
@@ -1005,54 +1071,173 @@ const closeTerms = () => {
 }
 
 const submitForm = async () => {
-  booking.name = formatName(booking.name)
-  booking.email = booking.email.toLowerCase().trim()
-  booking.piercees.forEach((p) => (p.name = formatName(p.name)))
-  const { valid: isFormValid } = await formRef.value.validate()
-  if (!isFormValid) return
-
-  if (!termsConfirmed.value) {
-    showTermsError.value = true
-    termsDialog.value = true
-    return
-  }
+  if (isSubmitting.value) return
+  isSubmitting.value = true
 
   try {
-    // Save to Firebase
-    await addDoc(collection(db, 'appointments'), {
+    booking.name = formatName(booking.name)
+    booking.email = booking.email.toLowerCase().trim()
+    booking.piercees.forEach((p) => (p.name = formatName(p.name)))
+    const { valid: isFormValid } = await formRef.value.validate()
+    if (!isFormValid) return
+
+    if (hasAnyPiercingService.value && !termsConfirmed.value) {
+      showTermsError.value = true
+      termsDialog.value = true
+      return
+    }
+
+    if (
+      !booking.date ||
+      !getAvailableStartTimes(new Date(booking.date), bookingDurationMinutes.value).includes(
+        booking.slot,
+      )
+    ) {
+      booking.slot = ''
+      slotConflictMessage.value = 'That start time is no longer available. Please choose another.'
+      return
+    }
+
+    const appointmentDate = new Date(booking.date!)
+    const startMinutes = parseTime(booking.slot)
+    if (startMinutes === null) {
+      throw new AppointmentSlotUnavailableError()
+    }
+
+    const endMinutes = startMinutes + bookingDurationMinutes.value
+    const dateKey = [
+      appointmentDate.getFullYear(),
+      String(appointmentDate.getMonth() + 1).padStart(2, '0'),
+      String(appointmentDate.getDate()).padStart(2, '0'),
+    ].join('-')
+    const slotLockRefs = Array.from(
+      { length: bookingDurationMinutes.value / SLOT_STEP_MINUTES },
+      (_, index) => {
+        const minute = startMinutes + index * SLOT_STEP_MINUTES
+        const lockId = `__slotlock__${dateKey}_${String(minute).padStart(4, '0')}`
+        return doc(db, 'appointments', lockId)
+      },
+    )
+
+    const startOfDay = new Date(appointmentDate)
+    startOfDay.setHours(0, 0, 0, 0)
+    const startOfNextDay = new Date(startOfDay)
+    startOfNextDay.setDate(startOfNextDay.getDate() + 1)
+    const dayAppointmentsQuery = query(
+      collection(db, 'appointments'),
+      where('date', '>=', Timestamp.fromDate(startOfDay)),
+      where('date', '<', Timestamp.fromDate(startOfNextDay)),
+    )
+    const existingDayAppointments = await getDocs(dayAppointmentsQuery)
+    const appointmentRef = doc(collection(db, 'appointments'))
+
+    const appointmentData = {
       ...booking,
-      createdAt: serverTimestamp(), // Adds a timestamp for sorting
+      date: Timestamp.fromDate(appointmentDate),
+      piercees: booking.piercees.map((person) => ({
+        name: person.name,
+        selections: person.selections.map((selection) => ({
+          piercing: selection.piercing ? { ...selection.piercing } : null,
+          isPair: selection.isPair,
+        })),
+      })),
+      slot: formattedAppointmentSlot.value,
+      durationMinutes: bookingDurationMinutes.value,
+      createdAt: serverTimestamp(),
+    }
+
+    await runTransaction(db, async (transaction) => {
+      const lockSnapshots = await Promise.all(
+        slotLockRefs.map((lockRef) => transaction.get(lockRef)),
+      )
+      const lockAppointments = await Promise.all(
+        lockSnapshots.map((lock) => {
+          if (!lock.exists()) return Promise.resolve(null)
+          const appointmentId = lock.data().appointmentId
+          return typeof appointmentId === 'string'
+            ? transaction.get(doc(db, 'appointments', appointmentId))
+            : Promise.resolve(null)
+        }),
+      )
+      const appointmentSnapshots = await Promise.all(
+        existingDayAppointments.docs.map((appointment) => transaction.get(appointment.ref)),
+      )
+
+      const occupiedLockExists = lockSnapshots.some((lock, index) => {
+        if (!lock.exists()) return false
+
+        const linkedAppointment = lockAppointments[index]
+        if (linkedAppointment && !linkedAppointment.exists()) {
+          transaction.delete(lock.ref)
+          return false
+        }
+
+        return true
+      })
+
+      if (occupiedLockExists) {
+        throw new AppointmentSlotUnavailableError()
+      }
+
+      const overlapsExistingAppointment = appointmentSnapshots.some((snapshot) => {
+        if (!snapshot.exists()) return false
+        const existingAppointment = {
+          ...snapshot.data(),
+          id: snapshot.id,
+        } as AppointmentRecord
+        const interval = getAppointmentInterval(existingAppointment)
+        return startMinutes < interval.end && endMinutes > interval.start
+      })
+
+      if (overlapsExistingAppointment) {
+        throw new AppointmentSlotUnavailableError()
+      }
+
+      transaction.set(appointmentRef, appointmentData)
+      // Share the existing Firestore collection/rules; no date or createdAt keeps locks out of booking lists.
+      slotLockRefs.forEach((lockRef, index) => {
+        const lockStart = startMinutes + index * SLOT_STEP_MINUTES
+        transaction.set(lockRef, {
+          recordType: 'slotLock',
+          appointmentId: appointmentRef.id,
+          dateKey,
+          startMinute: lockStart,
+          endMinute: lockStart + SLOT_STEP_MINUTES,
+        })
+      })
     })
 
     submitted.value = true
+    appointmentNoticeDialog.value = true
 
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }, 100)
   } catch (e) {
-    console.error('Error adding document: ', e)
-    alert('Failed to save booking. Please try again.')
+    if (e instanceof AppointmentSlotUnavailableError) {
+      booking.slot = ''
+      slotConflictMessage.value =
+        'That start time was just booked. Please choose another available time.'
+    } else {
+      console.error('Error adding document: ', e)
+      alert('Failed to save booking. Please try again.')
+    }
+  } finally {
+    isSubmitting.value = false
   }
 }
 
 const reportingTime = computed(() => {
   if (!booking.slot) return ''
 
-  // Extract the start time (e.g., "12:00pm" from "12:00pm-1:30pm")
   const startTime = (booking.slot || '').split('-')[0]?.trim() || ''
+  const startMinutes = parseTime(startTime)
+  if (startMinutes === null) return startTime
 
-  // Map specific start times to their reporting windows
-  const timeMap: Record<string, string> = {
-    '12:00pm': '12:00pm - 12:30pm',
-    '1:30pm': '1:30pm - 2:00pm',
-    '3:00pm': '3:00pm - 3:30pm',
-    '4:30pm': '4:30pm - 5:00pm',
-  }
-
-  return timeMap[startTime] || startTime
+  return `${startTime} - ${formatTime(startMinutes + 20)}`
 })
 
-const checkAnatomyRequirement = (val: any) => {
+const checkAnatomyRequirement = (val: PiercingOption | null) => {
   // If the user selected something and hasn't seen the warning this session
   if (val && !hasSeenAnatomyWarning.value) {
     anatomyDialog.value = true
@@ -1068,8 +1253,8 @@ const cleanupPastAppointments = async () => {
   // Filter local appointments that have already loaded
   // or run a specific query to find old ones
   const pastAppointments = appointments.value.filter((app) => {
-    const appDate = app.date.toDate ? app.date.toDate() : new Date(app.date)
-    return appDate < today
+    const appDate = getAppointmentDate(app.date)
+    return appDate !== null && appDate < today
   })
 
   if (pastAppointments.length === 0) return
@@ -1152,6 +1337,48 @@ onMounted(() => {
   -webkit-backdrop-filter: none !important;
 }
 
+.appointment-notice {
+  color: #4a4a4a;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.appointment-notice-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(139, 118, 162, 0.18);
+  border-radius: 12px;
+  background: rgba(139, 118, 162, 0.1);
+}
+
+.appointment-notice-row .label {
+  color: #6a6a6a;
+  white-space: nowrap;
+}
+
+.appointment-notice-row strong {
+  color: #4a4a4a;
+  text-align: right;
+}
+
+.appointment-notice-paragraph {
+  color: #666;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.appointment-notice-ok {
+  width: 120px;
+  min-height: 38px;
+  display: flex;
+  margin-inline: auto;
+}
+
 .menu-title {
   color: #4a4a4a;
   font-family: inherit;
@@ -1169,12 +1396,31 @@ onMounted(() => {
 }
 
 .price-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-end;
+  min-width: 64px;
+  min-height: 28px;
+  box-sizing: border-box;
   background: #8b76a2;
   color: white;
-  padding: 2px 10px;
-  border-radius: 20px;
+  padding: 4px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
   font-weight: 600;
   font-size: 0.85rem;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(67, 48, 86, 0.18);
+}
+
+.piercee-price-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  min-width: 0;
 }
 
 .grand-total-section {
@@ -1204,12 +1450,29 @@ onMounted(() => {
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
+.name-text-field {
+  width: calc(100% - 6px);
+}
+
+.piercing-select-field {
+  margin-inline-end: 6px;
+}
+
 .pair-checkbox-container {
   display: flex;
   align-items: center;
-  gap: 6px;
-  min-width: 60px;
+  gap: 4px;
+  min-width: 48px;
   user-select: none;
+}
+
+.selection-remove-btn {
+  flex: 0 0 24px;
+  width: 24px;
+  min-width: 24px !important;
+  height: 24px;
+  margin-inline-start: 2px;
+  padding: 0 !important;
 }
 
 .styled-checkbox {

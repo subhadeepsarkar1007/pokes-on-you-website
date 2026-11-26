@@ -106,10 +106,12 @@ import { db } from '../firebase'
 import {
   collection,
   query,
+  where,
   orderBy,
   onSnapshot,
   doc,
-  deleteDoc,
+  getDocs,
+  runTransaction,
   writeBatch,
 } from 'firebase/firestore'
 
@@ -242,10 +244,35 @@ const confirmDelete = (id: string) => {
 }
 
 const deleteEntry = async () => {
+  const appointmentId = selectedId.value
+  const appointmentRef = doc(db, 'appointments', appointmentId)
+
   try {
-    await deleteDoc(doc(db, 'appointments', selectedId.value))
+    const lockQuery = query(
+      collection(db, 'appointments'),
+      where('appointmentId', '==', appointmentId),
+    )
+    const lockDocuments = await getDocs(lockQuery)
+
+    await runTransaction(db, async (transaction) => {
+      const appointmentSnapshot = await transaction.get(appointmentRef)
+      const lockSnapshots = await Promise.all(
+        lockDocuments.docs.map((lock) => transaction.get(lock.ref)),
+      )
+
+      if (appointmentSnapshot.exists()) {
+        transaction.delete(appointmentRef)
+      }
+
+      lockSnapshots.forEach((lock) => {
+        if (lock.exists() && lock.data().appointmentId === appointmentId) {
+          transaction.delete(lock.ref)
+        }
+      })
+    })
     deleteDialog.value = false
   } catch (e) {
+    console.error('Error deleting appointment:', e)
     alert('Error deleting document')
   }
 }
